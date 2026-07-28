@@ -1,0 +1,55 @@
+---
+import Base from '../../layouts/Base.astro';
+import fs from 'node:fs';
+import path from 'node:path';
+
+// Auto-discover standalone prototypes dropped into public/experiments/.
+// Any *.html file there is served verbatim at /experiments/<name>.html
+// and listed here automatically — no need to edit this file.
+const dir = path.join(process.cwd(), 'public', 'experiments');
+
+let files: string[] = [];
+try {
+  files = fs
+    .readdirSync(dir)
+    .filter((f) => f.endsWith('.html') && f !== 'index.html')
+    .sort();
+} catch {
+  // Directory may not exist yet — that's fine.
+}
+
+// Turn "my-cool-thing.html" into "My cool thing" for display.
+function titleize(file: string): string {
+  const base = file.replace(/\.html$/, '').replace(/[-_]+/g, ' ');
+  return base.charAt(0).toUpperCase() + base.slice(1);
+}
+---
+
+<Base
+  title="Experiments — Wesley Finck"
+  description="Standalone prototypes and experiments by Wesley Finck."
+>
+  <p><a href="/">← Wesley Finck</a></p>
+  <h1>Experiments</h1>
+  <p class="lead">
+    Standalone prototypes I've built while exploring ideas. Each one is a
+    self-contained page.
+  </p>
+
+  {
+    files.length === 0 ? (
+      <p>
+        Nothing here yet. Drop an <code>.html</code> file into
+        <code>public/experiments/</code> and it will appear automatically.
+      </p>
+    ) : (
+      <ul class="links">
+        {files.map((file) => (
+          <li>
+            <a href={`/experiments/${file}`}>{titleize(file)}</a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Base>

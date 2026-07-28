@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lab Workspace · Augmented agent space (prototype)</title>
+<style>
+  :root {
+    --ink: #1d1c1d;
+    --ink-soft: #616061;
+    --ink-faint: #868686;
+    --line: #e6e4e6;
+    --bg: #ffffff;
+    --sidebar: #3f0e40;      /* slack aubergine */
+    --sidebar-hi: #522653;
+    --sidebar-active: #1164a3;
+    --sidebar-text: #cfc3cf;
+    --accent: #007a5a;       /* slack green */
+    --blue: #1264a3;
+    --agent: #6b3fa0;        /* agent purple */
+    --agent-soft: #f2ecfb;
+    --amber: #b5730f;
+    --amber-soft: #fdf3e3;
+    --green: #1f8a4c;
+    --green-soft: #e8f5ee;
+    --red: #b5121b;
+    --red-soft: #fbeaeb;
+    --serif: Georgia, "Times New Roman", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Lato", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: var(--sans); color: var(--ink); background: var(--bg);
+    -webkit-font-smoothing: antialiased; overflow: hidden;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  a { color: var(--blue); cursor: pointer; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .proto-banner {
+    background: #fff8e6; border-bottom: 1px solid #f0e2b8; color: #8a6d1f;
+    font-size: 11.5px; text-align: center; padding: 5px 12px;
+  }
+  .app { display: grid; grid-template-columns: 68px 240px 1fr; height: calc(100vh - 27px); min-height: 0; }
+
+  /* ---------- rail ---------- */
+  .rail { background: #2c0d2d; display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 16px; }
+  .rail .ws-logo { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg,#6b3fa0,#b5121b); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; font-family:var(--serif); }
+  .rail .ws-name { color:#cfc3cf; font-size:9px; text-align:center; line-height:1.2; }
+  .rail .r-icon { width:38px; height:38px; border-radius:10px; background:rgba(255,255,255,.08); color:#cfc3cf; display:flex; align-items:center; justify-content:center; font-size:17px; }
+  .rail .r-icon:hover { background:rgba(255,255,255,.16); }
+  .rail .spacer { flex:1; }
+  .rail .me { width:34px; height:34px; border-radius:9px; background:#2f7d56; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; }
+
+  /* ---------- channels sidebar ---------- */
+  .side { background: var(--sidebar); color: var(--sidebar-text); display: flex; flex-direction: column; min-height: 0; overflow-y: auto; }
+  .side .ws-head { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,.08); display:flex; align-items:center; justify-content:space-between; }
+  .side .ws-head .t { color:#fff; font-weight:800; font-size:15px; }
+  .side .ws-head .caret { color:#cfc3cf; font-size:11px; }
+  .side .sect { padding: 14px 8px 4px 16px; font-size:12px; color:#b7a9b7; font-weight:600; letter-spacing:.02em; }
+  .chan { display:flex; align-items:center; gap:8px; padding: 5px 16px; font-size:14px; color: var(--sidebar-text); cursor:pointer; }
+  .chan:hover { background: var(--sidebar-hi); }
+  .chan.active { background: var(--sidebar-active); color:#fff; font-weight:600; }
+  .chan .hash { opacity:.7; }
+  .chan .badge { margin-left:auto; background:#cd2553; color:#fff; font-size:11px; font-weight:700; border-radius:9px; padding:0 6px; }
+  .chan.agent .dot { width:9px; height:9px; border-radius:50%; background:#2bac76; box-shadow:0 0 0 2px var(--sidebar); }
+  .agent-ic { width:20px; height:20px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:11px; color:#fff; }
+
+  /* ---------- main ---------- */
+  .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; background:#fff; }
+  .main-head { border-bottom: 1px solid var(--line); padding: 12px 20px; display:flex; align-items:center; gap:12px; flex:none; }
+  .main-head .ch-name { font-weight: 800; font-size: 16px; display:flex; align-items:center; gap:6px; }
+  .main-head .ch-topic { font-size:12.5px; color: var(--ink-faint); border-left:1px solid var(--line); padding-left:12px; }
+  .main-head .spacer { flex:1; }
+  .head-pill { font-size:11.5px; color:var(--ink-soft); background:#f6f6f6; border:1px solid var(--line); border-radius:20px; padding:4px 11px; display:flex; align-items:center; gap:6px; }
+  .head-members { display:flex; }
+  .head-members .m { width:26px; height:26px; border-radius:6px; margin-left:-5px; border:2px solid #fff; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#fff; }
+
+  .stream { flex:1 1 auto; min-height:0; overflow-y:auto; padding: 8px 0 20px; }
+  .day-div { text-align:center; margin: 14px 0 10px; position:relative; }
+  .day-div span { background:#fff; border:1px solid var(--line); border-radius:20px; padding:3px 12px; font-size:11.5px; font-weight:600; color:var(--ink-soft); position:relative; z-index:1; }
+  .day-div:before { content:''; position:absolute; left:20px; right:20px; top:50%; height:1px; background:var(--line); }
+
+  .msg { display: grid; grid-template-columns: 42px 1fr; gap: 10px; padding: 7px 22px; }
+  .msg:hover { background:#f9f8f9; }
+  .msg .av { width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; color:#fff; }
+  .msg .who { display:flex; align-items:center; gap:8px; margin-bottom:1px; }
+  .msg .name { font-weight:800; font-size:14.5px; }
+  .msg .time { font-size:11px; color:var(--ink-faint); }
+  .tag-agent { font-size:9.5px; font-weight:700; letter-spacing:.03em; color:#fff; background:var(--agent); border-radius:4px; padding:1px 6px; text-transform:uppercase; }
+  .tag-app { background:var(--blue); }
+  .msg .body { font-size:14.5px; line-height:1.55; color:var(--ink); }
+  .msg .body p { margin: 0 0 7px; }
+  .msg .body ul { margin:4px 0 7px; padding-left:20px; }
+  .msg .body li { margin-bottom:4px; }
+
+  /* paper card dropped in */
+  .paper-card { border:1px solid var(--line); border-left:4px solid var(--red); border-radius:8px; padding:14px 16px; margin:6px 0; max-width:640px; background:#fff; }
+  .paper-card .pc-src { font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--red); margin-bottom:5px; }
+  .paper-card .pc-title { font-family:var(--serif); font-size:16px; font-weight:700; line-height:1.3; }
+  .paper-card .pc-auth { font-size:12px; color:var(--ink-faint); margin:4px 0 8px; }
+  .paper-card .pc-meta { display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--ink-soft); }
+  .pc-trust { display:inline-flex; align-items:center; gap:5px; color:var(--green); font-weight:700; }
+  .pc-trust.mid { color:var(--amber); }
+
+  /* agent working / block cards */
+  .work-card { border:1px solid var(--line); border-radius:8px; margin:6px 0; max-width:660px; overflow:hidden; }
+  .work-head { background:var(--agent-soft); padding:9px 14px; font-size:12.5px; font-weight:700; color:var(--agent); display:flex; align-items:center; gap:8px; }
+  .work-head .spin { animation: spin 1s linear infinite; display:inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .work-body { padding:12px 14px; }
+  .step { display:flex; align-items:center; gap:9px; font-size:13.5px; color:var(--ink-soft); padding:3px 0; }
+  .step .ck { width:17px; height:17px; border-radius:50%; background:var(--green); color:#fff; font-size:10px; display:flex; align-items:center; justify-content:center; flex:none; }
+  .step .pend { width:17px; height:17px; border-radius:50%; border:2px solid var(--line); flex:none; }
+
+  /* context pull card */
+  .ctx-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px; }
+  .ctx-tile { border:1px solid var(--line); border-radius:7px; padding:10px 12px; }
+  .ctx-tile .k { font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.04em; }
+  .ctx-tile .v { font-size:20px; font-weight:800; font-family:var(--serif); margin-top:2px; }
+  .ctx-tile .v.green { color:var(--green); }
+  .ctx-tile .sub { font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
+
+  /* discourse graph link chips */
+  .graph-links { display:flex; flex-direction:column; gap:7px; margin-top:4px; }
+  .glink { display:flex; align-items:center; gap:10px; border:1px solid var(--line); border-radius:7px; padding:9px 12px; font-size:13px; }
+  .glink .rel { font-size:9.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:3px 7px; border-radius:5px; flex:none; }
+  .rel.builds { background:#e9f0fb; color:var(--blue); }
+  .rel.conflicts { background:var(--red-soft); color:var(--red); }
+  .rel.informs { background:var(--green-soft); color:var(--green); }
+  .glink .gl-title { font-weight:600; }
+  .glink .gl-sub { color:var(--ink-faint); font-size:11.5px; }
+
+  /* proactive suggestion cards */
+  .suggest { border:1px solid #d9c8f0; border-left:4px solid var(--agent); border-radius:8px; margin:6px 0; max-width:660px; background:linear-gradient(180deg,#faf7ff,#fff); }
+  .suggest .s-head { padding:11px 14px 4px; font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px; }
+  .suggest .s-body { padding:0 14px 10px; font-size:13.5px; color:var(--ink-soft); line-height:1.55; }
+  .suggest .s-body .highlight { background:var(--amber-soft); padding:0 3px; border-radius:3px; }
+  .s-actions { display:flex; gap:8px; padding:0 14px 13px; flex-wrap:wrap; }
+  .s-btn { font-size:12.5px; font-weight:600; border:1px solid var(--line); background:#fff; border-radius:7px; padding:7px 13px; color:var(--ink); }
+  .s-btn:hover { background:#f6f6f6; }
+  .s-btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .s-btn.primary:hover { filter:brightness(1.06); }
+
+  /* reactions */
+  .reactions { display:flex; gap:6px; margin-top:7px; }
+  .rxn { display:inline-flex; align-items:center; gap:5px; font-size:12px; border:1px solid #d6e4f5; background:#eef5fc; border-radius:20px; padding:2px 9px; color:var(--blue); cursor:pointer; }
+  .rxn:hover { background:#e2eefb; }
+  .rxn.add { background:#f6f6f6; border-color:var(--line); color:var(--ink-faint); }
+
+  .thread-link { font-size:12.5px; color:var(--blue); font-weight:600; margin-top:6px; display:inline-flex; align-items:center; gap:6px; }
+  .thread-link .avs { display:flex; }
+  .thread-link .avs .a { width:18px; height:18px; border-radius:4px; margin-left:-3px; border:1.5px solid #fff; color:#fff; font-size:8px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+
+  /* composer */
+  .composer { flex:none; padding: 4px 22px 18px; }
+  .composer .box { border:1px solid #b7b5b8; border-radius:9px; overflow:hidden; }
+  .composer .tools { display:flex; align-items:center; gap:12px; padding:8px 12px; border-bottom:1px solid var(--line); color:var(--ink-faint); font-size:15px; }
+  .composer input { width:100%; border:none; padding:11px 14px; font-size:14.5px; font-family:inherit; outline:none; }
+  .composer .send-row { display:flex; align-items:center; padding:6px 10px; gap:10px; }
+  .composer .hint { font-size:11.5px; color:var(--ink-faint); }
+  .composer .send { margin-left:auto; background:var(--accent); color:#fff; border:none; border-radius:6px; width:30px; height:30px; font-size:14px; }
+  .composer .send:disabled { background:#e6e6e6; color:#aaa; }
+  .quick { display:flex; gap:7px; margin-bottom:8px; flex-wrap:wrap; }
+  .quick button { font-size:12px; border:1px solid var(--line); background:#fff; border-radius:16px; padding:5px 11px; color:var(--ink-soft); }
+  .quick button:hover { background:#f6f6f6; border-color:var(--ink-faint); }
+
+  .typing-note { font-size:11.5px; color:var(--ink-faint); padding:2px 4px 4px; height:16px; }
+</style>
+</head>
+<body>
+<div class="proto-banner">⚗️ Stretch concept — an <strong>augmented lab agent space</strong>. A preprint dropped into a Slack-like workspace where multi-agents ground it in the lab's discourse graph. Illustrative mock data.</div>
+
+<div class="app">
+  <!-- rail -->
+  <div class="rail">
+    <div class="ws-logo">KL</div>
+    <div class="ws-name">Köhler<br>Lab</div>
+    <div class="r-icon" title="Home">🏠</div>
+    <div class="r-icon" title="DMs">💬</div>
+    <div class="r-icon" title="Agents">🤖</div>
+    <div class="spacer"></div>
+    <div class="me">WF</div>
+  </div>
+
+  <!-- channels -->
+  <div class="side">
+    <div class="ws-head"><span class="t">Köhler Lab</span><span class="caret">▾</span></div>
+    <div class="sect">Channels</div>
+    <div class="chan"><span class="hash">#</span> general</div>
+    <div class="chan active"><span class="hash">#</span> imprinting-project <span class="badge">3</span></div>
+    <div class="chan"><span class="hash">#</span> lab-meeting</div>
+    <div class="chan"><span class="hash">#</span> paper-radar</div>
+    <div class="chan"><span class="hash">#</span> wet-lab-planning</div>
+
+    <div class="sect">Lab agents</div>
+    <div class="chan agent"><span class="agent-ic" style="background:#6b3fa0">📖</span> Reader-agent</div>
+    <div class="chan agent"><span class="agent-ic" style="background:#1264a3">🕸️</span> Graph-agent</div>
+    <div class="chan agent"><span class="agent-ic" style="background:#007a5a">🧪</span> Experiment-agent</div>
+    <div class="chan agent"><span class="agent-ic" style="background:#b5730f">✍️</span> Writer-agent</div>
+
+    <div class="sect">Direct messages</div>
+    <div class="chan"><span class="agent-ic" style="background:#2f7d56;border-radius:50%">DK</span> Dana Køhler (PI)</div>
+    <div class="chan"><span class="agent-ic" style="background:#8a5a2b;border-radius:50%">MK</span> Martin Kovačík</div>
+  </div>
+
+  <!-- main -->
+  <div class="main">
+    <div class="main-head">
+      <div class="ch-name"><span style="color:var(--ink-faint)">#</span> imprinting-project</div>
+      <div class="ch-topic">Endosperm imprinting networks · reciprocal-cross RNA-seq · Q3 experiments</div>
+      <div class="spacer"></div>
+      <div class="head-members">
+        <div class="m" style="background:#2f7d56">DK</div>
+        <div class="m" style="background:#8a5a2b">MK</div>
+        <div class="m" style="background:#2f7d56">WF</div>
+        <div class="m" style="background:#6b3fa0">🤖</div>
+      </div>
+      <div class="head-pill">4 agents active</div>
+    </div>
+
+    <div class="stream" id="stream">
+      <div class="day-div"><span>Today</span></div>
+
+      <!-- 1. researcher drops paper -->
+      <div class="msg">
+        <div class="av" style="background:#2f7d56">WF</div>
+        <div>
+          <div class="who"><span class="name">Wes Finck</span><span class="time">9:41 AM</span></div>
+          <div class="body">
+            <p>Found this on openRxiv this morning — pretty relevant to our reciprocal-cross work. Dropping it in for the agents to chew on 👇</p>
+            <div class="paper-card">
+              <div class="pc-src">📄 openRxiv preprint · dropped into workspace</div>
+              <div class="pc-title">Imprinted regulatory networks reveal the molecular cross-talk between paternal and maternal genomes in the endosperm of <em>Arabidopsis arenosa</em></div>
+              <div class="pc-auth">Budrasky, Kovačík, Čermák, Přibylová, Salony, Ilas, Pečinka, Lafon-Placette · 2026</div>
+              <div class="pc-meta">
+                <span class="pc-trust mid">▲ 0.74 soundness</span>
+                <span class="pc-trust">▲ 0.88 significance</span>
+                <span>💬 37 comments · 12 verified</span>
+                <span>🔗 9 connected works</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Reader-agent parses -->
+      <div class="msg">
+        <div class="av" style="background:#6b3fa0">📖</div>
+        <div>
+          <div class="who"><span class="name">Reader-agent</span><span class="tag-agent">agent</span><span class="time">9:41 AM</span></div>
+          <div class="body">
+            <div class="work-card">
+              <div class="work-head">📖 Parsing the OXA-structured preprint…</div>
+              <div class="work-body">
+                <div class="step"><span class="ck">✓</span> Extracted 4 core claims + 43 WGCNA modules</div>
+                <div class="step"><span class="ck">✓</span> Pulled figures, methods &amp; the reciprocal-cross dataset descriptor</div>
+                <div class="step"><span class="ck">✓</span> Ingested 37 comments &amp; the trust-weighted reception map</div>
+              </div>
+            </div>
+            <p style="margin-top:8px"><strong>TL;DR for the lab:</strong> Network-first take on endosperm imprinting in <em>A. arenosa</em>. Central finding — imprinting hits only a few pathways — is <strong>broadly agreed &amp; replicated</strong>. But two things the field is contesting are directly relevant to us:</p>
+            <ul>
+              <li>🟡 <strong>Indiscriminate maternal targeting</strong> of PEGs/MEGs — <em>actively debated</em>; a co-adaptation model fits the same data.</li>
+              <li>🔴 <strong>Module-enrichment signal</strong> — <em>under scrutiny</em> as a possible WGCNA thresholding artifact.</li>
+            </ul>
+            <div class="reactions">
+              <span class="rxn">👀 3</span><span class="rxn">🔥 2</span><span class="rxn add">+</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Graph-agent pulls community + connects to lab graph -->
+      <div class="msg">
+        <div class="av" style="background:#1264a3">🕸️</div>
+        <div>
+          <div class="who"><span class="name">Graph-agent</span><span class="tag-agent">agent</span><span class="time">9:42 AM</span></div>
+          <div class="body">
+            <p>Pulled the community/context data and grounded it against <strong>our lab's discourse graph</strong>:</p>
+            <div class="work-card">
+              <div class="work-head" style="background:#e9f0fb;color:var(--blue)">🕸️ Community context · prestige unbundled, weighted from the Köhler Lab's network</div>
+              <div class="work-body">
+                <div class="ctx-grid">
+                  <div class="ctx-tile"><div class="k">Soundness · method valid?</div><div class="v" style="color:var(--amber)">0.74</div><div class="sub">tempered by an open module-artifact critique</div></div>
+                  <div class="ctx-tile"><div class="k">Significance · matters to us?</div><div class="v green">0.88</div><div class="sub">5 vetted researchers · 2 hops from us</div></div>
+                  <div class="ctx-tile"><div class="k">Verified discussing</div><div class="v">12</div><div class="sub">incl. Dana (our PI) + R. Narayan</div></div>
+                  <div class="ctx-tile"><div class="k">Top critique weight</div><div class="v">0.91</div><div class="sub">module-artifact concern → the soundness drag</div></div>
+                </div>
+                <div style="font-size:11.5px;color:var(--ink-faint);margin-top:9px;line-height:1.5">Two signals, not one “prestige” number: the work reads as <strong>highly significant to our lab</strong> (0.88) but its <strong>soundness</strong> is held back (0.74) by the live methods critique — exactly the split worth surfacing before we build on it.</div>
+              </div>
+            </div>
+            <p style="margin-top:9px">And here's how it connects into <strong>what we're already working on</strong>:</p>
+            <div class="graph-links">
+              <div class="glink"><span class="rel conflicts">Conflicts</span><div><div class="gl-title">Our Q3 hypothesis: maternal regulators are PEG-specific in <em>A. lyrata</em></div><div class="gl-sub">This preprint reports the <em>opposite</em> in <em>A. arenosa</em> → species difference or method artifact?</div></div></div>
+              <div class="glink"><span class="rel builds">Builds on</span><div><div class="gl-title">Our reciprocal-cross RNA-seq pipeline (#wet-lab-planning)</div><div class="gl-sub">Their claim is testable with the ploidy-aware calls we already run</div></div></div>
+              <div class="glink"><span class="rel informs">Informs</span><div><div class="gl-title">Dana's draft grant aim 2 — "imprinting as a network property"</div><div class="gl-sub">Their WGCNA-module framing is citable supporting evidence</div></div></div>
+            </div>
+            <div class="reactions"><span class="rxn">🎯 4</span><span class="rxn">🕸️ 2</span><span class="rxn add">+</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Experiment-agent proactive suggestion -->
+      <div class="msg">
+        <div class="av" style="background:#007a5a">🧪</div>
+        <div>
+          <div class="who"><span class="name">Experiment-agent</span><span class="tag-agent">agent</span><span class="time">9:42 AM</span></div>
+          <div class="body">
+            <p>Because this <span style="background:var(--red-soft);padding:0 3px;border-radius:3px">conflicts with our Q3 hypothesis</span>, I looked at the experiments we have planned this week — there's a cheap way to adjudicate it.</p>
+            <div class="suggest">
+              <div class="s-head">🧪 Suggested tweak to this week's plan</div>
+              <div class="s-body">
+                Our scheduled <span class="highlight">reciprocal-cross RNA-seq on <em>A. lyrata</em> (Thu)</span> already produces allele-specific counts. If we <strong>add the two <em>A. arenosa</em> accessions</strong> we have in the growth chamber to the same run, we can directly test whether "indiscriminate maternal targeting" is real or a species/ploidy artifact — the exact thing the field is debating. Marginal cost: ~1 extra flow-cell lane, no new prep.
+              </div>
+              <div class="s-actions">
+                <button class="s-btn primary" onclick="accept(this,'Added an A. arenosa arm to Thursday\'s run in #wet-lab-planning and pinged Martin.')">✓ Add to Thursday's run</button>
+                <button class="s-btn" onclick="accept(this,'Drafted the design comparison as a thread for lab-meeting.')">Draft the comparison</button>
+                <button class="s-btn" onclick="accept(this,'Dismissed — kept the current plan.')">Not now</button>
+              </div>
+            </div>
+            <div class="thread-link"><span class="avs"><span class="a" style="background:#2f7d56">DK</span><span class="a" style="background:#8a5a2b">MK</span></span> 2 replies · Dana &amp; Martin</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Writer-agent proactive suggestion -->
+      <div class="msg">
+        <div class="av" style="background:#b5730f">✍️</div>
+        <div>
+          <div class="who"><span class="name">Writer-agent</span><span class="tag-agent">agent</span><span class="time">9:43 AM</span></div>
+          <div class="body">
+            <div class="suggest">
+              <div class="s-head">✍️ Want me to draft something based on these results?</div>
+              <div class="s-body">
+                This preprint's WGCNA-module framing is strong supporting evidence for <strong>Dana's grant Aim 2</strong> ("imprinting as a network property"). I can draft a 120-word paragraph citing it — and flag the module-artifact critique so we pre-empt a reviewer raising it. I can also post a <strong>trust-graph-grounded reply</strong> on the openRxiv discussion offering our reciprocal-cross angle.
+              </div>
+              <div class="s-actions">
+                <button class="s-btn primary" onclick="accept(this,'Drafted the Aim 2 paragraph → sent to Dana as a DM for review.')">Draft the grant paragraph</button>
+                <button class="s-btn" onclick="accept(this,'Drafted a reply on the openRxiv discussion (held for your approval).')">Draft an openRxiv reply</button>
+                <button class="s-btn" onclick="accept(this,'Okay — standing by.')">Maybe later</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. PI human reply -->
+      <div class="msg">
+        <div class="av" style="background:#2f7d56">DK</div>
+        <div>
+          <div class="who"><span class="name">Dana Køhler</span><span class="time">9:45 AM</span></div>
+          <div class="body">
+            <p>Love the Thursday tweak — do it. And yes to the grant paragraph, but keep the artifact caveat in. This is exactly the kind of thing I want the agents surfacing before lab meeting 👏</p>
+            <div class="reactions"><span class="rxn">💯 2</span><span class="rxn add">+</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="typing-note" id="typing-note"></div>
+    </div>
+
+    <!-- composer -->
+    <div class="composer">
+      <div class="quick" id="quick">
+        <button onclick="quickAsk('@Reader-agent summarize the top critiques')">📖 Summarize critiques</button>
+        <button onclick="quickAsk('@Graph-agent what else in our graph does this touch?')">🕸️ Connect to our work</button>
+        <button onclick="quickAsk('@Experiment-agent modify the experiments planned this week')">🧪 Modify this week's experiments</button>
+        <button onclick="quickAsk('@Writer-agent draft something based on these results')">✍️ Draft from results</button>
+      </div>
+      <div class="box">
+        <div class="tools">＋ &nbsp; <b>B</b> &nbsp; <i>i</i> &nbsp; 🔗 &nbsp; 📎 &nbsp; @ &nbsp; 😊</div>
+        <input id="composer-input" placeholder="Message #imprinting-project  (try @Experiment-agent …)"
+               oninput="document.getElementById('send').disabled=!this.value.trim()"
+               onkeydown="if(event.key==='Enter'&&this.value.trim()){send(this.value); this.value=''; document.getElementById('send').disabled=true;}">
+        <div class="send-row">
+          <span class="hint">Agents are grounded in this lab's discourse graph + openRxiv community context.</span>
+          <button class="send" id="send" disabled onclick="var i=document.getElementById('composer-input'); if(i.value.trim()){send(i.value); i.value=''; this.disabled=true;}">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const stream = document.getElementById('stream');
+const typingNote = document.getElementById('typing-note');
+
+function scrollDown(){ stream.scrollTop = stream.scrollHeight; }
+
+function accept(btn, note){
+  const actions = btn.parentElement;
+  actions.innerHTML = `<div style="font-size:12.5px;color:var(--green);font-weight:600;display:flex;align-items:center;gap:6px;">✓ ${note}</div>`;
+}
+
+function addMsg(html){
+  const el = document.createElement('div');
+  el.className = 'msg';
+  el.innerHTML = html;
+  stream.insertBefore(el, typingNote);
+  scrollDown();
+}
+
+function quickAsk(text){
+  const i = document.getElementById('composer-input');
+  send(text);
+}
+
+// agent routing for free-form / quick messages
+const agentMap = {
+  reader: { name:'Reader-agent', color:'#6b3fa0', ic:'📖' },
+  graph:  { name:'Graph-agent',  color:'#1264a3', ic:'🕸️' },
+  experiment: { name:'Experiment-agent', color:'#007a5a', ic:'🧪' },
+  writer: { name:'Writer-agent', color:'#b5730f', ic:'✍️' }
+};
+
+function pickAgent(text){
+  const l = text.toLowerCase();
+  if(l.includes('@reader')||l.includes('critique')||l.includes('summar')||l.includes('claim')) return 'reader';
+  if(l.includes('@graph')||l.includes('connect')||l.includes('graph')||l.includes('relate')) return 'graph';
+  if(l.includes('@experiment')||l.includes('experiment')||l.includes('plan')||l.includes('run')) return 'experiment';
+  if(l.includes('@writer')||l.includes('draft')||l.includes('write')||l.includes('grant')) return 'writer';
+  return 'reader';
+}
+
+const replies = {
+  reader: `<p><strong>Top critiques, trust-weighted:</strong></p>
+    <ul>
+      <li><strong>Module-artifact (0.91):</strong> Køhler-lab-adjacent reviewers say the WGCNA enrichment may be a thresholding artifact — needs a permutation null.</li>
+      <li><strong>Under-determined framing (0.84):</strong> a co-adaptation model predicts the same pattern; the paper doesn't distinguish it.</li>
+      <li><strong>Ploidy handling (0.79):</strong> A. arenosa is autotetraploid — are allele calls ploidy-aware?</li>
+    </ul>`,
+  graph: `<p>Beyond the Q3 conflict, this also touches:</p>
+    <div class="graph-links">
+      <div class="glink"><span class="rel builds">Builds on</span><div><div class="gl-title">Martin's 2025 module-detection notebook</div><div class="gl-sub">same WGCNA soft-threshold question — worth comparing</div></div></div>
+      <div class="glink"><span class="rel informs">Informs</span><div><div class="gl-title">#paper-radar shortlist for journal club</div><div class="gl-sub">good candidate given the live debate</div></div></div>
+    </div>`,
+  experiment: `<p>Looking at this week's plan, the cleanest adjudication:</p>
+    <div class="suggest"><div class="s-head">🧪 Add an A. arenosa arm to Thursday's run</div>
+      <div class="s-body">Reuses the scheduled reciprocal-cross lane; directly tests indiscriminate-vs-specific maternal targeting for ~1 extra lane, no new prep.</div>
+      <div class="s-actions"><button class="s-btn primary" onclick="accept(this,'Added to Thursday\\'s run.')">✓ Add it</button><button class="s-btn" onclick="accept(this,'Kept current plan.')">Not now</button></div></div>`,
+  writer: `<p>I can draft either of these (held for your approval):</p>
+    <div class="suggest"><div class="s-head">✍️ Draft options</div>
+      <div class="s-body">① A 120-word grant paragraph for Aim 2 citing this preprint (with the artifact caveat). ② A reciprocal-cross reply on the openRxiv discussion, grounded in our trust graph.</div>
+      <div class="s-actions"><button class="s-btn primary" onclick="accept(this,'Drafted → sent to Dana for review.')">Draft grant paragraph</button><button class="s-btn" onclick="accept(this,'Drafted openRxiv reply (pending approval).')">Draft reply</button></div></div>`
+};
+
+function send(text){
+  addMsg(`<div class="av" style="background:#2f7d56">WF</div>
+    <div><div class="who"><span class="name">Wes Finck</span><span class="time">now</span></div>
+    <div class="body"><p>${text.replace(/</g,'&lt;')}</p></div></div>`);
+
+  const key = pickAgent(text);
+  const a = agentMap[key];
+  typingNote.textContent = `${a.name} is thinking…`;
+  scrollDown();
+  setTimeout(()=>{
+    typingNote.textContent = '';
+    addMsg(`<div class="av" style="background:${a.color}">${a.ic}</div>
+      <div><div class="who"><span class="name">${a.name}</span><span class="tag-agent">agent</span><span class="time">now</span></div>
+      <div class="body">${replies[key]}</div></div>`);
+  }, 900);
+}
+</script>
+</body>
+</html>
