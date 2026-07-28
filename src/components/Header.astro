@@ -1,0 +1,27 @@
+---
+const links = [
+  { href: '/', label: 'Home' },
+  { href: '/portfolio', label: 'Portfolio' },
+  { href: '/experiments', label: 'Experiments' },
+  { href: '/contact', label: 'Contact' },
+];
+
+// Normalize the current path (strip trailing slash) for active-link matching.
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+---
+
+<header class="site-header">
+  <a href="/" class="brand">Wesley Finck</a>
+  <nav>
+    {
+      links.map((link) => (
+        <a
+          href={link.href}
+          aria-current={path === link.href ? 'page' : undefined}
+        >
+          {link.label}
+        </a>
+      ))
+    }
+  </nav>
+</header>
