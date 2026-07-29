@@ -1,923 +1,1758 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Semble Activity Feed Onboarding</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f7fa;
-            min-height: 100vh;
-        }
-
-        .screen {
-            display: none;
-            min-height: 100vh;
-        }
-
-        .screen.active {
-            display: flex;
-        }
-
-        /* ===== SIGN UP ===== */
-        #signupScreen {
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #1185fe 0%, #0066cc 100%);
-            padding: 40px 20px;
-        }
-
-        .signup-container {
-            text-align: center;
-            color: white;
-            max-width: 600px;
-        }
-
-        .logo {
-            font-size: 48px;
-            font-weight: bold;
-            margin-bottom: 30px;
-            background: rgba(255, 255, 255, 0.1);
-            width: 80px;
-            height: 80px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 30px;
-        }
-
-        .signup-container h1 {
-            font-size: 42px;
-            margin-bottom: 16px;
-            font-weight: 700;
-        }
-
-        .signup-container p {
-            font-size: 18px;
-            margin-bottom: 40px;
-            opacity: 0.95;
-            line-height: 1.6;
-        }
-
-        .btn-primary {
-            background: #ff6b4a;
-            color: white;
-            border: none;
-            padding: 14px 48px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-block;
-        }
-
-        .btn-primary:hover {
-            background: #ff5733;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(255, 107, 74, 0.3);
-        }
-
-        /* ===== FEED ONBOARDING ===== */
-        #feedScreen {
-            flex-direction: column;
-            background: #f5f7fa;
-        }
-
-        .feed-container {
-            display: grid;
-            grid-template-columns: 300px 1fr 280px;
-            gap: 20px;
-            padding: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
-            height: 100vh;
-        }
-
-        /* ===== LEFT SIDEBAR: CURATORS TO FOLLOW ===== */
-        .sidebar-left {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            overflow-y: auto;
-            padding-right: 8px;
-        }
-
-        .sidebar-section {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .sidebar-title {
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: #718096;
-            margin-bottom: 12px;
-            letter-spacing: 0.5px;
-        }
-
-        .curator-compact {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 8px;
-            border: 1px solid transparent;
-        }
-
-        .curator-compact:hover {
-            background: #f7fafc;
-            border-color: #e2e8f0;
-        }
-
-        .curator-avatar-sm {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1185fe 0%, #0066cc 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 14px;
-            font-weight: 600;
-            flex-shrink: 0;
-            position: relative;
-        }
-
-        .curator-avatar-sm .bsky-badge {
-            position: absolute;
-            bottom: -2px;
-            right: -2px;
-            background: #1185fe;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            border: 2px solid white;
-            font-size: 8px;
-        }
-
-        .curator-info-sm {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .curator-name-sm {
-            font-size: 12px;
-            font-weight: 600;
-            color: #1a202c;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .curator-saves {
-            font-size: 11px;
-            color: #a0aec0;
-        }
-
-        .follow-btn-sm {
-            padding: 4px 10px;
-            background: #1185fe;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .follow-btn-sm:hover {
-            background: #0066cc;
-        }
-
-        .follow-btn-sm.following {
-            background: white;
-            color: #1185fe;
-            border: 1px solid #1185fe;
-        }
-
-        /* Stats */
-        .stats-row {
-            display: flex;
-            gap: 8px;
-            font-size: 11px;
-            color: #718096;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .stat-item {
-            flex: 1;
-            text-align: center;
-        }
-
-        .stat-number {
-            font-weight: 600;
-            color: #1a202c;
-            font-size: 13px;
-        }
-
-        /* ===== CENTER: ACTIVITY FEED ===== */
-        .feed-center {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            overflow-y: auto;
-            padding-right: 8px;
-        }
-
-        .feed-header {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px solid #e2e8f0;
-            margin-bottom: 8px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .feed-header h2 {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1a202c;
-            margin-bottom: 8px;
-        }
-
-        .feed-header p {
-            font-size: 13px;
-            color: #718096;
-        }
-
-        .activity-item {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            border: 1px solid #e2e8f0;
-            transition: all 0.3s;
-        }
-
-        .activity-item:hover {
-            border-color: #cbd5e0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .activity-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-
-        .activity-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1185fe 0%, #0066cc 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            flex-shrink: 0;
-            position: relative;
-        }
-
-        .activity-avatar .bsky-badge {
-            position: absolute;
-            bottom: -2px;
-            right: -2px;
-            background: #1185fe;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            border: 2px solid white;
-            font-size: 10px;
-        }
-
-        .activity-text {
-            flex: 1;
-        }
-
-        .activity-action {
-            font-size: 13px;
-            font-weight: 600;
-            color: #1a202c;
-        }
-
-        .activity-actor {
-            color: #1185fe;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .activity-actor:hover {
-            text-decoration: underline;
-        }
-
-        .activity-time {
-            font-size: 12px;
-            color: #a0aec0;
-        }
-
-        /* Collection badge in activity */
-        .collection-context {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 600;
-            color: #764ba2;
-            background: #f3e8ff;
-            padding: 4px 10px;
-            border-radius: 4px;
-            margin-left: 8px;
-        }
-
-        /* Card preview */
-        .card-preview {
-            background: #f7fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 12px;
-            display: flex;
-            gap: 12px;
-        }
-
-        .card-preview-image {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 6px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 32px;
-        }
-
-        .card-preview-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .card-type {
-            display: inline-block;
-            font-size: 10px;
-            font-weight: 600;
-            color: #667eea;
-            background: #f0f4ff;
-            padding: 3px 8px;
-            border-radius: 3px;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-        }
-
-        .card-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: #1a202c;
-            margin-bottom: 4px;
-            line-height: 1.4;
-        }
-
-        .card-description {
-            font-size: 12px;
-            color: #718096;
-            line-height: 1.4;
-            margin-bottom: 8px;
-        }
-
-        .card-engagement {
-            font-size: 11px;
-            color: #a0aec0;
-        }
-
-        /* Connection line */
-        .connection-path {
-            font-size: 11px;
-            color: #a0aec0;
-            padding: 8px 0;
-            margin-top: 8px;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 8px;
-        }
-
-        .connection-path strong {
-            color: #1185fe;
-            cursor: pointer;
-        }
-
-        .connection-path strong:hover {
-            text-decoration: underline;
-        }
-
-        /* ===== RIGHT SIDEBAR: COLLECTIONS ===== */
-        .sidebar-right {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            overflow-y: auto;
-            padding-left: 8px;
-        }
-
-        .collection-card-compact {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 14px;
-            transition: all 0.3s;
-        }
-
-        .collection-card-compact:hover {
-            border-color: #cbd5e0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .collection-curator-sm {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .collection-curator-avatar-sm {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1185fe 0%, #0066cc 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
-            flex-shrink: 0;
-        }
-
-        .collection-curator-name-sm {
-            font-size: 11px;
-            font-weight: 600;
-            color: #1a202c;
-        }
-
-        .collection-title-compact {
-            font-size: 13px;
-            font-weight: 600;
-            color: #1a202c;
-            margin-bottom: 6px;
-            line-height: 1.3;
-        }
-
-        .collection-desc-compact {
-            font-size: 11px;
-            color: #718096;
-            margin-bottom: 10px;
-            line-height: 1.4;
-        }
-
-        .collection-meta-compact {
-            display: flex;
-            gap: 8px;
-            font-size: 10px;
-            color: #a0aec0;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .follow-collection-btn {
-            width: 100%;
-            padding: 6px;
-            background: #1185fe;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .follow-collection-btn:hover {
-            background: #0066cc;
-        }
-
-        .follow-collection-btn.following {
-            background: white;
-            color: #1185fe;
-            border: 1px solid #1185fe;
-        }
-
-        /* Scrollbar styling */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e0;
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a0aec0;
-        }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .feed-container {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar-left,
-            .sidebar-right {
-                display: none;
-            }
-        }
-
-        .btn-secondary {
-            padding: 10px 20px;
-            background: white;
-            border: 2px solid #e2e8f0;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-secondary:hover {
-            border-color: #cbd5e0;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>modular research preprint server demo with meaningful social context</title>
+<meta name="description" content="a concept preprint server demonstrating what kinds of features would be possible in the future with more modular research publishing and an open social protocol to layer in the public discourse in meaningful ways." />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="modular research preprint server demo with meaningful social context" />
+<meta property="og:description" content="a concept preprint server demonstrating what kinds of features would be possible in the future with more modular research publishing and an open social protocol to layer in the public discourse in meaningful ways." />
+<meta property="og:image" content="thumbnail.png" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="modular research preprint server demo with meaningful social context" />
+<meta name="twitter:description" content="a concept preprint server demonstrating what kinds of features would be possible in the future with more modular research publishing and an open social protocol to layer in the public discourse in meaningful ways." />
+<meta name="twitter:image" content="thumbnail.png" />
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --ink-soft: #4a4a4a;
+    --ink-faint: #767676;
+    --line: #e6e6e6;
+    --line-soft: #f0f0f0;
+    --bg: #ffffff;
+    --bg-soft: #fafafa;
+    --bg-panel: #f7f7f5;
+    --accent: #b5121b;        /* biorxiv red */
+    --accent-soft: #fbeaeb;
+    --green: #1f8a4c;
+    --green-soft: #e8f5ee;
+    --amber: #b5730f;
+    --amber-soft: #fdf3e3;
+    --blue: #1c5fb5;
+    --blue-soft: #e9f0fb;
+    --purple: #6b3fa0;
+    --purple-soft: #f0eafb;
+    --radius: 8px;
+    --serif: Georgia, "Times New Roman", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--bg-soft);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--blue); text-decoration: none; cursor: pointer; }
+  a:hover { text-decoration: underline; }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 40;
+    background: #fff; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 18px;
+    padding: 0 22px; height: 54px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 8px; cursor: pointer; }
+  .brand .logo { font-family: var(--serif); font-weight: 700; font-size: 22px; letter-spacing: -0.5px; }
+  .brand .logo .x { color: var(--accent); font-style: italic; }
+  .brand .sub { font-size: 12px; color: var(--ink-faint); font-weight: 500; }
+  .topbar .spacer { flex: 1; }
+  .topbar .navlink { font-size: 13px; color: var(--ink-soft); font-weight: 500; }
+  .topbar .navlink:hover { color: var(--ink); text-decoration: none; }
+  .lab-tag {
+    font-size: 11px; font-weight: 600; color: var(--green);
+    background: var(--green-soft); border: 1px solid #cbe8d6;
+    padding: 3px 9px; border-radius: 20px;
+  }
+
+  /* ---------- profile avatar + menu (top bar) ---------- */
+  .profile-wrap { position: relative; }
+  .profile-btn {
+    width: 34px; height: 34px; border-radius: 50%; border: 2px solid transparent;
+    background: #6b3fa0; color: #fff; font-size: 12.5px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; position: relative;
+  }
+  .profile-btn:hover { border-color: #d8c7ee; }
+  .profile-btn .verify-dot {
+    position: absolute; bottom: -2px; right: -2px; width: 13px; height: 13px;
+    background: var(--blue); border: 2px solid #fff; border-radius: 50%;
+    color: #fff; font-size: 8px; display: flex; align-items: center; justify-content: center;
+  }
+  .menu-pop {
+    position: absolute; z-index: 80; background: #fff; border: 1px solid var(--line);
+    border-radius: 11px; box-shadow: 0 14px 44px rgba(0,0,0,.18);
+    display: none; overflow: hidden;
+  }
+  .menu-pop.open { display: block; }
+  .profile-menu { top: 44px; right: 0; width: 288px; }
+  .pm-head { padding: 16px 17px 14px; border-bottom: 1px solid var(--line-soft); display: flex; gap: 12px; align-items: center; }
+  .pm-head .pm-av { width: 44px; height: 44px; border-radius: 50%; background: #6b3fa0; color: #fff; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pm-name { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+  .pm-verified { font-size: 10px; font-weight: 700; color: var(--blue); background: #e8f0fb; border: 1px solid #c5dbf5; padding: 1px 6px; border-radius: 20px; display: inline-flex; align-items: center; gap: 3px; }
+  .pm-handle { font-size: 12px; color: var(--ink-faint); margin-top: 2px; }
+  .pm-body { padding: 12px 17px 6px; }
+  .pm-field { margin-bottom: 12px; }
+  .pm-field .pm-lbl { font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 3px; }
+  .pm-field .pm-val { font-size: 12.5px; color: var(--ink); line-height: 1.4; }
+  .pm-field .pm-val a { font-weight: 600; }
+  .pm-orcid { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; color: #a6ce39; }
+  .pm-orcid .oi { width: 15px; height: 15px; border-radius: 50%; background: #a6ce39; color: #fff; font-size: 8px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .pm-labs { display: flex; flex-wrap: wrap; gap: 5px; }
+  .pm-lab-chip { font-size: 11px; font-weight: 600; color: var(--ink-soft); background: var(--bg-soft); border: 1px solid var(--line); padding: 2px 8px; border-radius: 20px; }
+  .pm-foot { border-top: 1px solid var(--line-soft); padding: 9px 8px; display: flex; }
+  .pm-foot a { flex: 1; text-align: center; font-size: 12px; font-weight: 600; padding: 6px; border-radius: 7px; }
+  .pm-foot a:hover { background: var(--bg-soft); text-decoration: none; }
+
+  /* ---------- paper action bar (reader) ---------- */
+  .paper-actions { display: flex; gap: 9px; align-items: center; margin: 16px 0 6px; flex-wrap: wrap; }
+  .pa-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+    border-radius: 8px; padding: 8px 13px; font-size: 13px; font-weight: 600;
+  }
+  .pa-btn:hover { background: var(--bg-soft); border-color: var(--ink-faint); }
+  .pa-btn.saved { background: var(--green-soft); border-color: #9ed3b4; color: var(--green); }
+  .pa-btn.primary { background: #6b3fa0; border-color: #6b3fa0; color: #fff; }
+  .pa-btn.primary:hover { filter: brightness(1.08); background: #6b3fa0; }
+  .pa-btn.following { background: #efe7f8; border-color: #cbb6e8; color: #6b3fa0; }
+  .pa-btn .caret { font-size: 9px; opacity: .7; }
+
+  /* follow options popover */
+  .follow-menu { top: 46px; left: 0; width: 316px; }
+  .fm-head { padding: 14px 16px 11px; border-bottom: 1px solid var(--line-soft); }
+  .fm-head .fm-t { font-size: 13.5px; font-weight: 700; }
+  .fm-head .fm-s { font-size: 11.5px; color: var(--ink-faint); margin-top: 2px; line-height: 1.4; }
+  .fm-opt { display: flex; gap: 11px; padding: 11px 16px; cursor: pointer; border-bottom: 1px solid var(--line-soft); align-items: flex-start; }
+  .fm-opt:last-of-type { border-bottom: none; }
+  .fm-opt:hover { background: var(--bg-soft); }
+  .fm-check {
+    width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--line);
+    flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #fff; background: #fff;
+  }
+  .fm-opt.on .fm-check { background: #6b3fa0; border-color: #6b3fa0; }
+  .fm-opt-txt .fm-o-t { font-size: 12.5px; font-weight: 600; }
+  .fm-opt-txt .fm-o-d { font-size: 11px; color: var(--ink-faint); margin-top: 1px; line-height: 1.35; }
+  .fm-foot { padding: 10px 16px; background: var(--bg-panel); font-size: 11px; color: var(--ink-faint); }
+  .fm-foot b { color: #6b3fa0; }
+
+  /* endorse / review menu */
+  .pa-btn.endorse { background: var(--green); border-color: var(--green); color: #fff; }
+  .pa-btn.endorse:hover { filter: brightness(1.07); background: var(--green); }
+  .pa-btn.endorsed { background: var(--green-soft); border-color: #9ed3b4; color: var(--green); }
+  .endorse-menu { top: 46px; left: 0; width: 340px; }
+  .em-head { padding: 15px 17px 12px; border-bottom: 1px solid var(--line-soft); }
+  .em-head .em-t { font-size: 14px; font-weight: 700; }
+  .em-head .em-s { font-size: 11.5px; color: var(--ink-faint); margin-top: 3px; line-height: 1.45; }
+  .em-head .em-s b { color: var(--ink); }
+  .em-sec { padding: 13px 17px; border-bottom: 1px solid var(--line-soft); }
+  .em-sec-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 9px; }
+  .em-sec-lbl { font-size: 12.5px; font-weight: 700; }
+  .em-sec-lbl .em-hint { font-size: 10.5px; font-weight: 500; color: var(--ink-faint); }
+  .em-sec-val { font-size: 12px; font-weight: 700; }
+  .em-scale { display: flex; gap: 5px; }
+  .em-dot {
+    flex: 1; height: 26px; border-radius: 6px; border: 1px solid var(--line);
+    background: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: var(--ink-faint);
+  }
+  .em-dot:hover { border-color: var(--ink-faint); }
+  .em-scale.sound .em-dot.on { background: var(--amber); border-color: var(--amber); color: #fff; }
+  .em-scale.signif .em-dot.on { background: var(--green); border-color: var(--green); color: #fff; }
+  .em-scale-ends { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink-faint); margin-top: 5px; }
+  .em-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .em-tag {
+    font-size: 11.5px; font-weight: 600; color: var(--ink-soft);
+    background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 4px 11px;
+  }
+  .em-tag:hover { border-color: var(--ink-faint); }
+  .em-tag.on { background: #eef4ec; border-color: #9ed3b4; color: var(--green); }
+  .em-tag.on::before { content: "✓ "; }
+  .em-foot { padding: 11px 16px; display: flex; gap: 9px; align-items: center; }
+  .em-submit { flex: 1; background: var(--green); color: #fff; border: none; border-radius: 7px; padding: 9px; font-size: 12.5px; font-weight: 700; }
+  .em-submit:hover { filter: brightness(1.07); }
+  .em-submit:disabled { background: var(--line); color: var(--ink-faint); cursor: default; filter: none; }
+  .em-signed { font-size: 10px; color: var(--ink-faint); line-height: 1.35; }
+  .em-signed b { color: var(--blue); }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 22px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ---------- trending / home ---------- */
+  .hero {
+    background: #fff; border-bottom: 1px solid var(--line);
+    padding: 34px 0 26px;
+  }
+  .hero .wrap { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .hero .biglogo { font-family: var(--serif); font-size: 46px; font-weight: 700; letter-spacing: -1px; }
+  .hero .biglogo .x { color: var(--accent); font-style: italic; }
+  .hero .tagline { color: var(--ink-soft); font-size: 15px; margin-top: 6px; max-width: 560px; }
+  .searchbar {
+    margin-top: 22px; width: 100%; max-width: 680px;
+    display: flex; align-items: center; gap: 10px;
+    border: 1px solid var(--line); border-radius: 26px;
+    padding: 11px 18px; background: #fff; color: var(--ink-faint);
+    box-shadow: 0 1px 2px rgba(0,0,0,.03);
+  }
+  .searchbar svg { flex: none; }
+
+  .section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: 30px 0 4px;
+  }
+  .section-head h2 {
+    font-family: var(--serif); font-size: 22px; font-weight: 700; margin: 0;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .flame { color: var(--accent); }
+  .info-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1px solid var(--line); background: #fff; color: var(--ink-faint);
+    font-size: 12px; font-weight: 700; font-style: italic; font-family: var(--serif);
+  }
+  .info-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .section-sub { color: var(--ink-faint); font-size: 13px; margin: 2px 0 16px; }
+
+  .paper-list { display: flex; flex-direction: column; gap: 0; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .paper-row {
+    display: grid; grid-template-columns: 74px 1fr 220px;
+    gap: 20px; padding: 20px 22px; border-bottom: 1px solid var(--line-soft);
+    cursor: pointer; transition: background .12s;
+  }
+  .paper-row:last-child { border-bottom: none; }
+  .paper-row:hover { background: var(--bg-soft); }
+  .rank-col { text-align: center; }
+  .rank-num { font-family: var(--serif); font-size: 30px; font-weight: 700; color: #d0d0d0; line-height: 1; }
+  .field-tag {
+    display: inline-block; margin-top: 8px;
+    font-size: 9.5px; font-weight: 700; letter-spacing: .06em;
+    color: var(--ink-faint); text-transform: uppercase;
+  }
+  .paper-title { font-family: var(--serif); font-size: 18px; font-weight: 700; line-height: 1.3; margin: 0 0 5px; color: var(--ink); }
+  .paper-row:hover .paper-title { color: var(--accent); }
+  .paper-authors { font-size: 12.5px; color: var(--ink-faint); margin-bottom: 8px; }
+  .paper-abstract { font-size: 13px; color: var(--ink-soft); line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  /* trust cluster on the right of each row */
+  .trust-col { border-left: 1px solid var(--line-soft); padding-left: 18px; }
+  /* two-score stack: soundness + significance */
+  .dual-score { display: flex; flex-direction: column; gap: 9px; margin-bottom: 8px; }
+  .ds-row .ds-top { display: flex; align-items: baseline; justify-content: space-between; }
+  .ds-row .ds-lbl { font-size: 9.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-faint); }
+  .ds-row .ds-num { font-size: 17px; font-weight: 700; font-family: var(--serif); line-height: 1; }
+  .ds-row .ds-num.good { color: var(--green); }
+  .ds-row .ds-num.mid { color: var(--amber); }
+  .ds-row .ds-num.low { color: var(--accent); }
+  .ds-meter { height: 4px; border-radius: 3px; background: var(--line); margin-top: 5px; overflow: hidden; }
+  .ds-meter > span { display: block; height: 100%; border-radius: 3px; }
+  .trust-score-lg { display: flex; align-items: baseline; gap: 6px; }
+  .trust-score-lg .num { font-size: 24px; font-weight: 700; color: var(--green); font-family: var(--serif); }
+  .trust-score-lg .lbl { font-size: 11px; color: var(--ink-faint); }
+  .trust-meter { height: 5px; border-radius: 4px; background: var(--line); margin: 7px 0 8px; overflow: hidden; }
+  .trust-meter > span { display: block; height: 100%; background: var(--green); border-radius: 4px; }
+  .trust-detail { font-size: 11.5px; color: var(--ink-faint); line-height: 1.45; }
+  .avatars { display: flex; margin: 8px 0 0; }
+  .avatars .av {
+    width: 22px; height: 22px; border-radius: 50%; margin-left: -6px;
+    border: 2px solid #fff; font-size: 9px; font-weight: 700; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .avatars .av:first-child { margin-left: 0; }
+  .why-link { font-size: 11px; margin-top: 7px; display: inline-block; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+  .chip {
+    font-size: 11px; padding: 3px 9px; border-radius: 20px;
+    border: 1px solid var(--line); color: var(--ink-soft); background: #fff;
+  }
+  .chip.debated { background: var(--amber-soft); border-color: #f0d9b0; color: var(--amber); }
+  .chip.agreed { background: var(--green-soft); border-color: #cbe8d6; color: var(--green); }
+
+  /* ---------- reader ---------- */
+  .reader-grid { display: grid; grid-template-columns: 1fr 340px; gap: 0; align-items: start; }
+  .reader-main { background: #fff; border: 1px solid var(--line); border-right: none;
+    border-radius: var(--radius) 0 0 var(--radius); padding: 40px 52px; min-height: 80vh; }
+  .breadcrumb { font-size: 12.5px; color: var(--ink-faint); margin-bottom: 18px; }
+  .doc-field { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  .doc-title { font-family: var(--serif); font-size: 30px; line-height: 1.22; font-weight: 700; margin: 8px 0 14px; }
+  .doc-authors { font-size: 14px; color: var(--ink-soft); margin-bottom: 8px; }
+  .doc-meta { font-size: 12.5px; color: var(--ink-faint); padding-bottom: 16px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  .preprint-note { font-size: 12.5px; color: var(--ink-faint); margin-bottom: 24px; }
+  .preprint-note .badge { display:inline-block; background: var(--amber-soft); color: var(--amber); font-weight:600; padding: 2px 7px; border-radius: 4px; font-size: 11px; }
+  .doc h3 { font-family: var(--serif); font-size: 20px; margin: 28px 0 10px; }
+  .doc p { font-size: 15px; line-height: 1.72; color: #222; margin: 0 0 15px; }
+  .doc .figure { border: 1px solid var(--line); border-radius: 6px; background: var(--bg-soft);
+    padding: 18px; text-align: center; margin: 22px 0; }
+  .doc .figure .ph { height: 150px; background: repeating-linear-gradient(45deg,#eee,#eee 10px,#f6f6f6 10px,#f6f6f6 20px);
+    border-radius: 4px; display:flex; align-items:center; justify-content:center; color:#bbb; font-size:13px; }
+  .doc .figcap { font-size: 12.5px; color: var(--ink-faint); margin-top: 10px; text-align: left; }
+
+  /* inline highlight / annotation */
+  .hl { background: var(--amber-soft); border-bottom: 1.5px solid #edc680; cursor: pointer; padding: 0 1px; position: relative; }
+  .hl.agree { background: var(--green-soft); border-bottom-color: #9ed3b4; }
+  .hl.debate { background: var(--amber-soft); border-bottom-color: #edc680; }
+  .hl:hover { filter: brightness(.97); }
+  .anno-flag {
+    font-size: 10px; font-weight: 700; vertical-align: super;
+    color: #fff; border-radius: 3px; padding: 0 4px; margin-left: 2px;
+  }
+  .anno-flag.agree { background: var(--green); }
+  .anno-flag.debate { background: var(--amber); }
+
+  /* reader sidebar */
+  .reader-side { position: sticky; top: 66px; }
+  .side-card { background: #fff; border: 1px solid var(--line); border-radius: 0 var(--radius) var(--radius) 0; overflow: hidden; }
+  .side-card + .side-card { margin-top: 14px; border-radius: var(--radius); }
+  .side-head { background: var(--accent); color: #fff; padding: 11px 16px; font-size: 13px; font-weight: 700; letter-spacing: .02em; }
+  .side-row { display: flex; align-items: center; gap: 11px; padding: 11px 16px; border-bottom: 1px solid var(--line-soft); font-size: 13px; color: var(--ink-soft); }
+  .side-row:last-child { border-bottom: none; }
+  .side-row .cnt { margin-left: auto; min-width: 24px; height: 24px; border-radius: 50%;
+    background: var(--bg-panel); border: 1px solid var(--line); display:flex; align-items:center; justify-content:center;
+    font-size: 11.5px; font-weight: 700; color: var(--ink); }
+  .side-row.clickable { cursor: pointer; }
+  .side-row.clickable:hover { background: var(--bg-soft); }
+  .side-row .ic { width: 18px; text-align: center; }
+  .cta-side { margin: 14px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: #fff; border: none; border-radius: 6px;
+    padding: 11px 16px; font-size: 13.5px; font-weight: 600; width: 100%;
+  }
+  .btn:hover { filter: brightness(1.05); }
+  .btn.ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+  .btn.ghost:hover { background: var(--bg-soft); filter: none; }
+  .btn.dark { background: #1a1a1a; }
+
+  .side-mini-note { font-size: 11.5px; color: var(--ink-faint); padding: 0 16px 14px; }
+
+  /* ---------- discussion / social context ---------- */
+  .disc-grid { display: grid; grid-template-columns: 1fr 320px; gap: 26px; align-items: start; }
+  .disc-header { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 26px; margin-bottom: 22px; }
+  .disc-header .doc-title { font-size: 23px; margin-top: 0; }
+  .disc-stats { display: flex; gap: 26px; flex-wrap: wrap; margin-top: 14px; padding-top: 16px; border-top: 1px solid var(--line-soft); }
+  .disc-stat .n { font-size: 21px; font-weight: 700; font-family: var(--serif); }
+  .disc-stat .l { font-size: 11.5px; color: var(--ink-faint); }
+  .disc-stat .n.green { color: var(--green); }
+
+  .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 22px; overflow: hidden; }
+  .panel-head { padding: 16px 22px 6px; }
+  .panel-head h3 { font-family: var(--serif); font-size: 18px; margin: 0; display: flex; align-items: center; gap: 8px; }
+  .panel-head p { font-size: 12.5px; color: var(--ink-faint); margin: 4px 0 0; }
+  .panel-body { padding: 8px 22px 20px; }
+
+  /* reception map */
+  .reception { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+  .recept-row { border: 1px solid var(--line); border-radius: 7px; padding: 12px 14px; }
+  .recept-row.agree { border-left: 4px solid var(--green); }
+  .recept-row.debate { border-left: 4px solid var(--amber); }
+  .recept-row.scrutiny { border-left: 4px solid var(--accent); }
+  .recept-claim { font-size: 13.5px; color: var(--ink); font-style: italic; font-family: var(--serif); line-height: 1.5; }
+  .recept-foot { display: flex; align-items: center; gap: 10px; margin-top: 9px; font-size: 11.5px; color: var(--ink-faint); flex-wrap: wrap; }
+  .pill { font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 20px; letter-spacing: .02em; }
+  .pill.agree { background: var(--green-soft); color: var(--green); }
+  .pill.debate { background: var(--amber-soft); color: var(--amber); }
+  .pill.scrutiny { background: var(--accent-soft); color: var(--accent); }
+  .recept-bar { display:flex; height: 6px; border-radius: 4px; overflow: hidden; margin-top: 9px; background: var(--line); }
+  .recept-bar > i { display: block; height: 100%; }
+
+  /* critique cards */
+  .critique { border: 1px solid var(--line); border-radius: 7px; padding: 14px 16px; margin-bottom: 12px; }
+  .critique:last-child { margin-bottom: 0; }
+  .critique .ct-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .critique .ct-author { font-size: 13px; font-weight: 600; }
+  .critique .ct-role { font-size: 11px; color: var(--ink-faint); }
+  .verified { display:inline-flex; align-items:center; gap:3px; font-size: 10.5px; font-weight:600; color: var(--blue); background: var(--blue-soft); padding: 1px 7px; border-radius: 12px; }
+  .critique .ct-body { font-size: 13.5px; color: var(--ink-soft); line-height: 1.55; }
+  .critique .ct-foot { display:flex; align-items:center; gap:16px; margin-top: 10px; font-size: 12px; color: var(--ink-faint); }
+  .ct-foot .agree-cnt { display:inline-flex; align-items:center; gap:5px; }
+  .mini-trust { display:inline-flex; align-items:center; gap:5px; font-size:11px; color: var(--green); font-weight:600; }
+
+  /* community note / opposes */
+  .comm-note { background: var(--blue-soft); border: 1px solid #cddffa; border-radius: 8px; padding: 14px 16px; }
+  .comm-note .cn-tag { display:inline-flex; align-items:center; gap:6px; font-size: 11px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 7px; }
+  .comm-note .cn-body { font-size: 13.5px; color: var(--ink); line-height: 1.55; }
+  .comm-note .cn-foot { font-size: 11.5px; color: var(--ink-faint); margin-top: 9px; }
+
+  /* related / connections */
+  .rel-item { display: grid; grid-template-columns: 90px 1fr; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--line-soft); }
+  .rel-item:last-child { border-bottom: none; }
+  .conn-badge { font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 4px 8px; border-radius: 5px; text-align: center; height: fit-content; }
+  .conn-badge.discussed { background: var(--purple-soft); color: var(--purple); }
+  .conn-badge.opposes { background: var(--accent-soft); color: var(--accent); }
+  .conn-badge.supports { background: var(--green-soft); color: var(--green); }
+  .conn-badge.builds { background: var(--blue-soft); color: var(--blue); }
+  .rel-title { font-family: var(--serif); font-size: 15px; font-weight: 700; line-height: 1.3; }
+  .rel-title:hover { color: var(--accent); }
+  .rel-sub { font-size: 11.5px; color: var(--ink-faint); margin-top: 3px; }
+
+  /* discussion sidebar */
+  .disc-side { position: sticky; top: 66px; display: flex; flex-direction: column; gap: 18px; }
+
+  /* trust perspective selector */
+  .persp-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+  .persp-card h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-faint); margin: 0 0 10px; }
+  .persp-select { width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: 6px; font-size: 13px; font-family: inherit; color: var(--ink); background: #fff; }
+  .persp-note { font-size: 11.5px; color: var(--ink-faint); margin-top: 10px; line-height: 1.5; }
+  .persp-legend { margin-top: 14px; display:flex; flex-direction: column; gap: 7px; }
+  .legend-row { display:flex; align-items:center; gap:8px; font-size:12px; color: var(--ink-soft); }
+  .legend-dot { width: 11px; height: 11px; border-radius: 3px; flex:none; }
+
+  /* discussants */
+  .discussants .d-row { display:flex; align-items:center; gap:10px; padding: 9px 0; border-bottom: 1px solid var(--line-soft); }
+  .discussants .d-row:last-child { border-bottom: none; }
+  .discussants .d-name { font-size: 13px; font-weight: 600; }
+  .discussants .d-role { font-size: 11px; color: var(--ink-faint); }
+
+  /* ---------- AI panel (slide-over) ---------- */
+  .ai-fab {
+    position: fixed; right: 26px; bottom: 26px; z-index: 45;
+    display: inline-flex; align-items: center; gap: 9px;
+    background: #1a1a1a; color: #fff; border: none; border-radius: 26px;
+    padding: 13px 20px; font-size: 14px; font-weight: 600;
+    box-shadow: 0 6px 22px rgba(0,0,0,.22);
+  }
+  .ai-fab:hover { transform: translateY(-1px); }
+  .ai-fab .spark { font-size: 15px; }
+
+  .ai-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.28); z-index: 60; display: none; }
+  .ai-overlay.open { display: block; }
+  .ai-panel {
+    position: fixed; top: 0; right: 0; height: 100%; width: 440px; max-width: 92vw;
+    background: #fff; z-index: 61; box-shadow: -8px 0 30px rgba(0,0,0,.16);
+    display: flex; flex-direction: column; transform: translateX(100%); transition: transform .22s ease;
+  }
+  .ai-panel.open { transform: translateX(0); }
+  .ai-top { display:flex; align-items:center; gap:10px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .ai-top .ttl { font-weight: 700; font-size: 15px; display:flex; align-items:center; gap:8px; }
+  .ai-top .ctx { font-size: 11.5px; color: var(--ink-faint); }
+  .ai-top .x { margin-left: auto; border: none; background: none; font-size: 20px; color: var(--ink-faint); }
+  .ai-body { flex: 1; overflow-y: auto; padding: 18px 20px; }
+  .ai-suggests { display:flex; flex-direction: column; gap: 9px; margin-bottom: 6px; }
+  .ai-suggest {
+    text-align: left; border: 1px solid var(--line); background: var(--bg-soft);
+    border-radius: 9px; padding: 11px 13px; font-size: 13px; color: var(--ink); width: 100%;
+  }
+  .ai-suggest:hover { border-color: var(--ink-faint); background: #fff; }
+  .ai-msg { margin: 14px 0; }
+  .ai-msg.user { text-align: right; }
+  .ai-msg.user .bubble { display:inline-block; background: #1a1a1a; color:#fff; padding: 9px 13px; border-radius: 13px 13px 3px 13px; font-size: 13.5px; max-width: 85%; text-align:left; }
+  .ai-msg.bot .bubble { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 3px 13px 13px 13px; padding: 13px 15px; font-size: 13.5px; line-height: 1.6; }
+  .ai-msg.bot .bubble h5 { margin: 0 0 6px; font-size: 12.5px; text-transform: uppercase; letter-spacing:.04em; color: var(--ink-faint); }
+  .ai-msg.bot .bubble ul { margin: 6px 0 0; padding-left: 18px; }
+  .ai-msg.bot .bubble li { margin-bottom: 6px; }
+  .ai-src { font-size: 11px; color: var(--ink-faint); margin-top: 10px; padding-top: 9px; border-top: 1px dashed var(--line); }
+  .ai-src .tag { color: var(--blue); font-weight: 600; }
+  .ai-input { border-top: 1px solid var(--line); padding: 12px 16px; display:flex; gap: 8px; }
+  .ai-input input { flex:1; border: 1px solid var(--line); border-radius: 20px; padding: 10px 15px; font-size: 13.5px; font-family: inherit; }
+  .ai-input button { border:none; background: #1a1a1a; color:#fff; border-radius: 50%; width: 38px; height: 38px; font-size: 16px; }
+  .typing { display:inline-flex; gap:4px; }
+  .typing span { width:6px; height:6px; border-radius:50%; background:#bbb; animation: blink 1.2s infinite; }
+  .typing span:nth-child(2){ animation-delay:.2s; } .typing span:nth-child(3){ animation-delay:.4s; }
+  @keyframes blink { 0%,60%,100%{opacity:.3} 30%{opacity:1} }
+
+  /* ---------- inline reference / figure triggers ---------- */
+  .ref-link {
+    color: var(--blue); cursor: pointer; border-bottom: 1px dotted #9db8e0;
+    padding: 0 1px; white-space: nowrap;
+  }
+  .ref-link:hover { background: var(--blue-soft); }
+  .fig-link {
+    color: var(--purple); cursor: pointer; font-weight: 600;
+    border-bottom: 1px dotted #b39bd6; white-space: nowrap;
+  }
+  .fig-link:hover { background: var(--purple-soft); }
+
+  /* ---------- hover popover ---------- */
+  .pop {
+    position: absolute; z-index: 80; width: 366px;
+    background: #fff; border: 1px solid var(--line); border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.18);
+    opacity: 0; transform: translateY(4px); pointer-events: none;
+    transition: opacity .13s ease, transform .13s ease;
+    font-size: 13px; max-height: 82vh; overflow-y: auto;
+  }
+  .pop.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .pop-arrow {
+    position: absolute; width: 12px; height: 12px; background: #fff;
+    border-left: 1px solid var(--line); border-top: 1px solid var(--line);
+    transform: rotate(45deg); top: -7px; left: 28px;
+  }
+  .pop.below .pop-arrow { top: auto; bottom: -7px; transform: rotate(225deg); }
+
+  /* popover — reference variant */
+  .pop-body { padding: 14px 16px 4px; }
+  .pop-kicker { font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; display:flex; align-items:center; gap:6px; }
+  .pop-title { font-family: var(--serif); font-size: 14.5px; font-weight: 700; line-height: 1.32; color: var(--ink); }
+  .pop-meta { font-size: 11.5px; color: var(--ink-faint); margin-top: 4px; }
+
+  /* soundness / significance scores */
+  .pop-scores { display: flex; gap: 10px; margin: 13px 0 4px; }
+  .score-cell { flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; background: var(--bg-soft); }
+  .score-cell .sc-lbl { font-size: 9.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-faint); }
+  .score-cell .sc-val { display:flex; align-items:baseline; gap:4px; margin-top: 3px; }
+  .score-cell .sc-num { font-family: var(--serif); font-size: 20px; font-weight: 700; line-height: 1; }
+  .score-cell .sc-num.good { color: var(--green); }
+  .score-cell .sc-num.mid { color: var(--amber); }
+  .score-cell .sc-max { font-size: 10.5px; color: var(--ink-faint); }
+  .score-cell .sc-bar { height: 4px; border-radius: 3px; background: var(--line); margin-top: 7px; overflow: hidden; }
+  .score-cell .sc-bar > i { display:block; height:100%; border-radius:3px; }
+  .pop-scnote { font-size: 10.5px; color: var(--ink-faint); margin-top: 8px; line-height: 1.45; }
+  .pop-scnote a { font-size: 10.5px; }
+
+  /* ---- granular discourse graph inside popover ---- */
+  .pop-graph { padding: 10px 16px 4px; border-top: 1px solid var(--line-soft); }
+  .pg-dir { margin-top: 8px; }
+  .pg-dir:first-child { margin-top: 2px; }
+  .pg-dir-lbl { font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); display:flex; align-items:center; gap:5px; margin-bottom: 5px; }
+  .pg-dir-lbl .arrow { font-size: 11px; }
+  .pg-dir.up .arrow { color: var(--blue); }
+  .pg-dir.down .arrow { color: var(--purple); }
+  .pg-edge { display:flex; gap:8px; padding: 5px 0 5px 2px; border-bottom: 1px dashed var(--line-soft); }
+  .pg-edge:last-child { border-bottom: none; }
+  .pg-rel {
+    flex: none; font-size: 8.5px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 4px; height: fit-content; margin-top: 1px; white-space: nowrap;
+  }
+  .pg-rel.uses { background: var(--bg-panel); color: var(--ink-soft); border:1px solid var(--line); }
+  .pg-rel.supports, .pg-rel.replicates { background: var(--green-soft); color: var(--green); }
+  .pg-rel.opposes, .pg-rel.disputes { background: var(--accent-soft); color: var(--accent); }
+  .pg-rel.builds, .pg-rel.extends { background: var(--blue-soft); color: var(--blue); }
+  .pg-rel.explains, .pg-rel.discussed { background: var(--purple-soft); color: var(--purple); }
+  .pg-edge-main { flex: 1; min-width: 0; }
+  .pg-unit { font-size: 11.5px; color: var(--ink); line-height: 1.35; font-weight: 600; }
+  .pg-unit .anchor { color: var(--purple); font-weight: 700; cursor: pointer; }
+  .pg-unit .anchor:hover { text-decoration: underline; }
+  .pg-sub { font-size: 10.5px; color: var(--ink-faint); margin-top: 2px; line-height: 1.35; }
+  .pg-sub .who { color: var(--ink-soft); font-weight: 600; }
+  .pg-mini { display:inline-flex; align-items:center; gap:3px; font-size: 9.5px; font-weight: 700; margin-left: 4px; }
+  .pg-mini.good { color: var(--green); } .pg-mini.mid { color: var(--amber); } .pg-mini.low { color: var(--accent); }
+  .pg-more { font-size: 10.5px; color: var(--blue); font-weight: 600; padding: 6px 0 2px; cursor: pointer; }
+  .pg-more:hover { text-decoration: underline; }
+
+  /* claim-unit chips in the reader body */
+  .unit-tag {
+    display:inline-block; font-size: 9px; font-weight: 700; vertical-align: super;
+    color: var(--purple); background: var(--purple-soft); border:1px solid #d9c8f0;
+    border-radius: 3px; padding: 0 3px; margin-left: 2px; cursor: pointer;
+  }
+  .unit-tag:hover { background: #e6d8f7; }
+
+  /* social context strip */
+  .pop-social { display:flex; align-items:center; gap:8px; padding: 11px 16px; border-top: 1px solid var(--line-soft); background: var(--bg-panel); }
+  .pop-social .savers { display:flex; }
+  .pop-social .savers .av { width: 20px; height: 20px; border-radius: 50%; margin-left:-6px; border: 2px solid var(--bg-panel); font-size:8px; font-weight:700; color:#fff; display:flex; align-items:center; justify-content:center; }
+  .pop-social .savers .av:first-child { margin-left: 0; }
+  .pop-social .soc-txt { font-size: 11px; color: var(--ink-soft); line-height: 1.35; }
+  .pop-social .soc-txt strong { color: var(--ink); }
+
+  /* action buttons */
+  .pop-actions { display:flex; gap: 6px; padding: 10px 14px 14px; }
+  .pop-btn {
+    flex: 1; display:inline-flex; align-items:center; justify-content:center; gap:5px;
+    border: 1px solid var(--line); background:#fff; color: var(--ink);
+    border-radius: 7px; padding: 8px 6px; font-size: 12px; font-weight: 600;
+  }
+  .pop-btn:hover { background: var(--bg-soft); border-color: var(--ink-faint); }
+  .pop-btn.primary { background: #6b3fa0; border-color:#6b3fa0; color:#fff; }
+  .pop-btn.primary:hover { filter: brightness(1.08); background:#6b3fa0; }
+  .pop-btn.saved { background: var(--green-soft); border-color:#9ed3b4; color: var(--green); }
+  .pop-brand { font-size: 9.5px; color: var(--ink-faint); text-align:right; padding: 0 14px 10px; }
+  .pop-brand b { color:#6b3fa0; }
+
+  /* popover — figure variant */
+  .pop.fig { width: 360px; }
+  .pop .fig-preview { height: 150px; margin: 12px 16px 0; border-radius: 7px;
+    background: repeating-linear-gradient(45deg,#eee,#eee 10px,#f6f6f6 10px,#f6f6f6 20px);
+    display:flex; align-items:center; justify-content:center; color:#aaa; font-size:12px; border:1px solid var(--line); }
+
+  /* ---------- modal ---------- */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.42); z-index: 70; display: none; align-items: center; justify-content: center; padding: 24px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 12px; max-width: 520px; width: 100%; padding: 26px 28px; box-shadow: 0 20px 60px rgba(0,0,0,.3); max-height: 88vh; overflow-y: auto; }
+  .modal h3 { font-family: var(--serif); font-size: 21px; margin: 0 0 6px; }
+  .modal .m-sub { font-size: 13px; color: var(--ink-faint); margin-bottom: 18px; }
+  .modal .x { position: absolute; }
+  .modal-close { float: right; border: none; background: none; font-size: 22px; color: var(--ink-faint); margin: -8px -8px 0 0; }
+  .score-box { display:flex; align-items:center; gap: 18px; background: var(--green-soft); border:1px solid #cbe8d6; border-radius: 10px; padding: 16px 18px; margin-bottom: 18px; }
+  .score-box .big { font-size: 42px; font-weight: 700; color: var(--green); font-family: var(--serif); line-height:1; }
+  .score-box .desc { font-size: 13px; color: var(--ink-soft); }
+  .contributor { display:flex; align-items:center; gap: 11px; padding: 9px 0; border-bottom: 1px solid var(--line-soft); }
+  .contributor:last-child { border-bottom: none; }
+  .contributor .c-name { font-size: 13px; font-weight: 600; }
+  .contributor .c-role { font-size: 11.5px; color: var(--ink-faint); }
+  .contributor .c-weight { margin-left: auto; font-size: 12px; color: var(--green); font-weight: 600; }
+  .modal .m-explain { font-size: 12.5px; color: var(--ink-soft); line-height: 1.6; background: var(--bg-soft); border-radius: 8px; padding: 13px 15px; margin-top: 16px; }
+  .modal .m-explain strong { color: var(--ink); }
+
+  .avatar-md { width: 34px; height: 34px; border-radius: 50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size: 13px; font-weight: 700; flex:none; }
+
+  footer { text-align: center; padding: 34px 0 44px; color: var(--ink-faint); font-size: 12px; }
+  .proto-banner {
+    background: #fff8e6; border-bottom: 1px solid #f0e2b8; color: #8a6d1f;
+    font-size: 12px; text-align: center; padding: 6px 12px;
+  }
+
+  /* ---------- responsive / mobile ---------- */
+  @media (max-width: 860px) {
+    .wrap { padding: 0 16px; }
+
+    /* top bar wraps and scrolls its nav */
+    .topbar { height: auto; flex-wrap: wrap; gap: 10px 14px; padding: 10px 16px; }
+    .topbar .spacer { display: none; }
+    .lab-tag { order: 3; }
+    .brand .logo { font-size: 20px; }
+
+    /* hero */
+    .hero { padding: 24px 0 20px; }
+    .hero .biglogo { font-size: 34px; }
+    .hero .tagline { font-size: 14px; }
+    .searchbar { margin-top: 16px; font-size: 13px; padding: 10px 14px; }
+
+    /* paper rows collapse to a single column; trust cluster below */
+    .paper-row { grid-template-columns: 1fr; gap: 12px; padding: 16px; }
+    .rank-col { display: flex; align-items: baseline; gap: 10px; text-align: left; }
+    .rank-num { font-size: 22px; }
+    .field-tag { margin-top: 0; }
+    .trust-col { border-left: none; padding-left: 0; border-top: 1px solid var(--line-soft); padding-top: 12px; }
+
+    /* reader collapses to one column, sidebar drops below */
+    .reader-grid { grid-template-columns: 1fr; }
+    .reader-main { border-right: 1px solid var(--line); border-radius: var(--radius) var(--radius) 0 0; padding: 24px 20px; min-height: 0; }
+    .doc-title { font-size: 23px; }
+    .doc p { font-size: 14.5px; }
+    .reader-side { position: static; top: auto; }
+    .side-card { border-radius: 0 0 var(--radius) var(--radius); }
+    .side-card + .side-card { margin-top: 14px; border-radius: var(--radius); }
+    .paper-actions { gap: 7px; }
+    .pa-btn { padding: 7px 11px; font-size: 12.5px; }
+
+    /* discussion collapses; sidebar drops below and unsticks */
+    .disc-grid { grid-template-columns: 1fr; gap: 18px; }
+    .disc-side { position: static; top: auto; }
+    .disc-header { padding: 18px 18px; }
+    .disc-header .doc-title { font-size: 20px; }
+    .disc-stats { gap: 16px 22px; }
+    .panel-head, .panel-body { padding-left: 16px; padding-right: 16px; }
+    .rel-item { grid-template-columns: 1fr; gap: 6px; }
+
+    /* dropdown menus + popovers fit the viewport */
+    .profile-menu, .follow-menu, .endorse-menu { width: min(320px, calc(100vw - 24px)); }
+    .pop, .pop.fig { width: min(366px, calc(100vw - 24px)); }
+
+    /* AI panel + FAB */
+    .ai-panel { width: 100%; max-width: 100vw; }
+    .ai-fab { right: 16px; bottom: 16px; padding: 11px 16px; font-size: 13px; }
+  }
+
+  @media (max-width: 480px) {
+    .topbar .navlink { font-size: 12.5px; }
+    .disc-stats { gap: 12px 18px; }
+    .disc-stat .n { font-size: 18px; }
+    .reader-main { padding: 20px 15px; }
+    .modal { padding: 20px 18px; }
+    .modal h3 { font-size: 18px; }
+  }
+</style>
 </head>
 <body>
-    <!-- SCREEN 1: Sign Up -->
-    <div id="signupScreen" class="screen active">
-        <div class="signup-container">
-            <div class="logo">🧭</div>
-            <h1>Welcome to Semble</h1>
-            <p>See what your Bluesky network is discovering and curating</p>
-            <button class="btn-primary" onclick="goToScreen('feedScreen')">Sign up with Bluesky</button>
+
+<div class="proto-banner">⚗️ Prototype — a preprint reader enriched with <strong>social context</strong>. Trust signals, discussion &amp; connections are illustrative mock data.</div>
+
+<!-- ============ TOP BAR ============ -->
+<div class="topbar">
+  <div class="brand" onclick="go('home')">
+    <span class="logo">open<span class="x">R&#120;iv</span></span>
+    <span class="sub">· Social Context</span>
+  </div>
+  <span class="lab-tag">Labs experiment</span>
+  <div class="spacer"></div>
+  <a class="navlink" onclick="go('home')">Trending</a>
+  <a class="navlink" onclick="go('reader')">Reader</a>
+  <a class="navlink" onclick="go('discussion')">Discussion</a>
+
+  <div class="profile-wrap">
+    <button class="profile-btn" onclick="toggleMenu(event,'profile-menu')" title="Your profile">
+      RK<span class="verify-dot" title="Verified researcher">✓</span>
+    </button>
+    <div class="menu-pop profile-menu" id="profile-menu" onclick="event.stopPropagation()">
+      <div class="pm-head">
+        <div class="pm-av">RK</div>
+        <div>
+          <div class="pm-name">Dr. Rina Kessler <span class="pm-verified">✓ Verified</span></div>
+          <div class="pm-handle">@rkessler · plant epigenetics</div>
         </div>
+      </div>
+      <div class="pm-body">
+        <div class="pm-field">
+          <div class="pm-lbl">ORCID iD</div>
+          <div class="pm-val"><span class="pm-orcid"><span class="oi">iD</span> 0000-0002-7143-9920</span></div>
+        </div>
+        <div class="pm-field">
+          <div class="pm-lbl">Affiliation</div>
+          <div class="pm-val">Max Planck Institute for Plant Breeding Research · Dept. of Chromosome Biology</div>
+        </div>
+        <div class="pm-field">
+          <div class="pm-lbl">Lab memberships</div>
+          <div class="pm-val pm-labs">
+            <span class="pm-lab-chip">Pečinka Lab</span>
+            <span class="pm-lab-chip">Imprinting Consortium</span>
+            <span class="pm-lab-chip">HHMI Reviewers</span>
+          </div>
+        </div>
+        <div class="pm-field">
+          <div class="pm-lbl">Researcher status</div>
+          <div class="pm-val"><span class="pm-verified">✓ Verified</span> &nbsp;<span style="color:var(--ink-faint);font-size:11.5px;">via ORCID + institutional email · vouched by 3 peers</span></div>
+        </div>
+      </div>
+      <div class="pm-foot">
+        <a onclick="pulse(this)">Your library</a>
+        <a onclick="pulse(this)">Settings</a>
+        <a onclick="pulse(this)">Sign out</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HOME / TRENDING ============ -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="wrap">
+      <div class="biglogo">open<span class="x">R&#120;iv</span></div>
+      <div class="tagline">Preprints, enriched with the conversation happening around them.</div>
+      <div class="searchbar">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        Search by title, author, claim, or DOI…
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="section-head">
+      <h2><span class="flame">🔥</span> Trending preprints
+        <button class="info-btn" onclick="openTrustModal()" title="What does trending mean?">i</button>
+      </h2>
+    </div>
+    <div class="section-sub">
+      Prestige, unbundled into two signals — <strong>soundness</strong> (is the method valid?) and <strong>significance</strong> (does it matter to your field?),
+      weighted by researchers you and your field vouch for. <a onclick="openTrustModal()">How is this computed? →</a>
     </div>
 
-    <!-- SCREEN 2: Activity Feed -->
-    <div id="feedScreen" class="screen">
-        <div class="feed-container">
-            <!-- LEFT SIDEBAR: TOP CURATORS -->
-            <div class="sidebar-left">
-                <div class="sidebar-section">
-                    <div class="sidebar-title">Top Curators</div>
+    <div class="paper-list" id="trending-list"></div>
 
-                    <div class="curator-compact" onclick="highlightCurator('DR')">
-                        <div class="curator-avatar-sm">
-                            DR
-                            <div class="bsky-badge">🦋</div>
-                        </div>
-                        <div class="curator-info-sm">
-                            <div class="curator-name-sm">Dr. Sarah Chen</div>
-                            <div class="curator-saves">156 saves</div>
-                        </div>
-                        <button class="follow-btn-sm" onclick="event.stopPropagation(); toggleFollow(this)">Follow</button>
-                    </div>
+    <div class="section-head"><h2>Recent in your fields</h2></div>
+    <div class="section-sub">Cell biology · Genetics · Biochemistry</div>
+    <div class="paper-list" id="recent-list"></div>
+  </div>
+  <footer>openRxiv Labs · Curvenote-style reader prototype · social context layer by Semble</footer>
+</div>
 
-                    <div class="curator-compact" onclick="highlightCurator('JM')">
-                        <div class="curator-avatar-sm">
-                            JM
-                            <div class="bsky-badge">🦋</div>
-                        </div>
-                        <div class="curator-info-sm">
-                            <div class="curator-name-sm">James Mitchell</div>
-                            <div class="curator-saves">203 saves</div>
-                        </div>
-                        <button class="follow-btn-sm" onclick="event.stopPropagation(); toggleFollow(this)">Follow</button>
-                    </div>
+<!-- ============ READER ============ -->
+<div id="page-reader" class="page">
+  <div class="wrap" style="padding-top:22px;">
+    <div class="reader-grid">
+      <div class="reader-main">
+        <div class="breadcrumb"><a onclick="go('home')">Trending</a> › Reader</div>
+        <div class="doc-field">PLANT BIOLOGY · GENETICS</div>
+        <h1 class="doc-title">Imprinted regulatory networks reveal the molecular cross-talk between paternal and maternal genomes in the endosperm of <em>Arabidopsis arenosa</em></h1>
+        <div class="doc-authors">Trezalka Budrasky, Martin Kovačík, Vojtěch Čermák, Adéla Přibylová, Sussela Salony, Ömer Ilas, Aleš Pečinka, Clément Lafon-Placette</div>
+        <div class="doc-meta">Posted July 14, 2026 · doi.org/10.64898/2026.07.13.740033 · <a>Version 1</a></div>
+        <div class="preprint-note"><span class="badge">Preprint</span> This article is a bioRxiv preprint and has not been certified by peer review. <a onclick="openPeerModal()">what does this mean?</a></div>
 
-                    <div class="curator-compact" onclick="highlightCurator('AK')">
-                        <div class="curator-avatar-sm">
-                            AK
-                            <div class="bsky-badge">🦋</div>
-                        </div>
-                        <div class="curator-info-sm">
-                            <div class="curator-name-sm">Ananya Krishnan</div>
-                            <div class="curator-saves">124 saves</div>
-                        </div>
-                        <button class="follow-btn-sm" onclick="event.stopPropagation(); toggleFollow(this)">Follow</button>
-                    </div>
-
-                    <div class="curator-compact" onclick="highlightCurator('LW')">
-                        <div class="curator-avatar-sm">
-                            LW
-                            <div class="bsky-badge">🦋</div>
-                        </div>
-                        <div class="curator-info-sm">
-                            <div class="curator-name-sm">Laura Watson</div>
-                            <div class="curator-saves">89 saves</div>
-                        </div>
-                        <button class="follow-btn-sm" onclick="event.stopPropagation(); toggleFollow(this)">Follow</button>
-                    </div>
-
-                    <div class="stats-row">
-                        <div class="stat-item">
-                            <div class="stat-number">24</div>
-                            <div>Total Following</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-number">127</div>
-                            <div>New Cards Today</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sidebar-section">
-                    <div class="sidebar-title">Popular Topics</div>
-                    <div style="font-size: 12px; color: #718096; line-height: 1.8;">
-                        <div style="padding: 8px; cursor: pointer; border-radius: 6px; transition: all 0.3s; background: white;" onmouseover="this.style.background='#f7fafc'" onmouseout="this.style.background='white'">🤖 AI Safety</div>
-                        <div style="padding: 8px; cursor: pointer; border-radius: 6px; transition: all 0.3s; background: white;" onmouseover="this.style.background='#f7fafc'" onmouseout="this.style.background='white'">📊 ML at Scale</div>
-                        <div style="padding: 8px; cursor: pointer; border-radius: 6px; transition: all 0.3s; background: white;" onmouseover="this.style.background='#f7fafc'" onmouseout="this.style.background='white'">🏛️ Governance</div>
-                        <div style="padding: 8px; cursor: pointer; border-radius: 6px; transition: all 0.3s; background: white;" onmouseover="this.style.background='#f7fafc'" onmouseout="this.style.background='white'">📚 Open Science</div>
-                    </div>
-                </div>
+        <div class="paper-actions">
+          <button class="pa-btn" id="paper-save" onclick="togglePaperSave()">🔖 Save</button>
+          <button class="pa-btn" onclick="pulse(this)">🔗 Connect</button>
+          <div class="profile-wrap">
+            <button class="pa-btn" id="paper-follow" onclick="toggleMenu(event,'follow-menu')">🔔 Follow this paper <span class="caret">▾</span></button>
+            <div class="menu-pop follow-menu" id="follow-menu" onclick="event.stopPropagation()">
+              <div class="fm-head">
+                <div class="fm-t">Follow this preprint</div>
+                <div class="fm-s">Get notified as the conversation around it evolves. Pick what matters to you.</div>
+              </div>
+              <div class="fm-opt" onclick="toggleFollowOpt(this)">
+                <div class="fm-check">✓</div>
+                <div class="fm-opt-txt"><div class="fm-o-t">All activity</div><div class="fm-o-d">Every comment, connection, annotation & new version.</div></div>
+              </div>
+              <div class="fm-opt on" onclick="toggleFollowOpt(this)">
+                <div class="fm-check">✓</div>
+                <div class="fm-opt-txt"><div class="fm-o-t">New critiques from verified researchers</div><div class="fm-o-d">Only substantive reviews from vetted experts in the field.</div></div>
+              </div>
+              <div class="fm-opt on" onclick="toggleFollowOpt(this)">
+                <div class="fm-check">✓</div>
+                <div class="fm-opt-txt"><div class="fm-o-t">Updates & new versions</div><div class="fm-o-d">Author revisions, published-journal links, retractions.</div></div>
+              </div>
+              <div class="fm-opt" onclick="toggleFollowOpt(this)">
+                <div class="fm-check">✓</div>
+                <div class="fm-opt-txt"><div class="fm-o-t">Score shifts</div><div class="fm-o-d">When soundness or significance moves meaningfully.</div></div>
+              </div>
+              <div class="fm-opt" onclick="toggleFollowOpt(this)">
+                <div class="fm-check">✓</div>
+                <div class="fm-opt-txt"><div class="fm-o-t">New connected work</div><div class="fm-o-d">Papers that replicate, extend, or dispute this one.</div></div>
+              </div>
+              <div class="fm-foot">Delivered to your <b>Semble</b> notifications · unfollow anytime.</div>
             </div>
+          </div>
 
-            <!-- CENTER: ACTIVITY FEED -->
-            <div class="feed-center">
-                <div class="feed-header">
-                    <h2>Activity from Your Network</h2>
-                    <p>See what people you follow are discovering and organizing</p>
-                </div>
+          <div class="profile-wrap">
+            <button class="pa-btn endorse" id="paper-endorse" onclick="toggleMenu(event,'endorse-menu')">👏 Endorse / review <span class="caret">▾</span></button>
+            <div class="menu-pop endorse-menu" id="endorse-menu" onclick="event.stopPropagation()">
+              <div class="em-head">
+                <div class="em-t">Endorse this work</div>
+                <div class="em-s">A lightweight, signed review — inspired by Plaudit, but split along the two axes. You're rating as <b>Dr. Rina Kessler ✓ verified</b>. Feeds into the community soundness &amp; significance scores.</div>
+              </div>
 
-                <!-- Activity 1 -->
-                <div class="activity-item">
-                    <div class="activity-header">
-                        <div class="activity-avatar">
-                            DR
-                            <div class="bsky-badge">🦋</div>
-                        </div>
-                        <div class="activity-text">
-                            <div class="activity-action">
-                                <span class="activity-actor">Dr. Sarah Chen</span> saved to
-                                <span class="collection-context">AI Safety Fundamentals</span>
-                            </div>
-                            <div class="activity-time">2 hours ago</div>
-                        </div>
-                    </div>
-                    <div class="card-preview">
-                        <div class="card-preview-image">📊</div>
-                        <div class="card-preview-content">
-                            <span class="card-type">Research</span>
-                            <div class="card-title">Scaling Laws for Transfer Learning in Large Language Models</div>
-                            <div class="card-description">Recent empirical findings on how pre-training dataset size and model capacity interact...</div>
-                            <div class="card-engagement">💾 287 saves • 🔗 12 connections</div>
-                        </div>
-                    </div>
-                    <div class="connection-path">
-                        Also saved by <strong>James Mitchell</strong> and <strong>2 others</strong> you follow
-                    </div>
+              <div class="em-sec">
+                <div class="em-sec-top">
+                  <div class="em-sec-lbl">Soundness <span class="em-hint">· is the method valid?</span></div>
+                  <div class="em-sec-val" id="em-sound-val" style="color:var(--ink-faint)">—</div>
                 </div>
+                <div class="em-scale sound" id="em-sound">
+                  <div class="em-dot" onclick="rate('sound',1)">1</div>
+                  <div class="em-dot" onclick="rate('sound',2)">2</div>
+                  <div class="em-dot" onclick="rate('sound',3)">3</div>
+                  <div class="em-dot" onclick="rate('sound',4)">4</div>
+                  <div class="em-dot" onclick="rate('sound',5)">5</div>
+                </div>
+                <div class="em-scale-ends"><span>Serious flaws</span><span>Rigorous</span></div>
+              </div>
 
-                <!-- Activity 2 -->
-                <div class="activity-item">
-                    <div class="activity-header">
-                        <div class="activity-avatar">
-                            JM
-                            <div class="bsky-badge">🦋</div>
-                        </div>
-                        <div class="activity-text">
-                            <div class="activity-action">
-                                <span class="activity-actor">James Mitchell</span> created
-                                <span class="collection-context">Machine Learning at Scale</span>
-                            </div>
-                            <div class="activity-time">5 hours ago</div>
-                        </div>
-                    </div>
-                    <div style="font-size: 12px; color: #718096; margin-top: 12px; padding: 12px; background: #f7fafc; border-radius: 8px; border-left: 3px solid #1185fe;">
-                        <strong>New Collection</strong><br>
-                        Training, inference, and the engineering challenges of large language models and distributed systems. Currently has 8 items.
-                    </div>
-                    <div class="connection-path">
-                        <strong>3 people</strong> you follow have bookmarked this collection
-                    </div>
+              <div class="em-sec">
+                <div class="em-sec-top">
+                  <div class="em-sec-lbl">Significance <span class="em-hint">· does it matter?</span></div>
+                  <div class="em-sec-val" id="em-signif-val" style="color:var(--ink-faint)">—</div>
                 </div>
+                <div class="em-scale signif" id="em-signif">
+                  <div class="em-dot" onclick="rate('signif',1)">1</div>
+                  <div class="em-dot" onclick="rate('signif',2)">2</div>
+                  <div class="em-dot" onclick="rate('signif',3)">3</div>
+                  <div class="em-dot" onclick="rate('signif',4)">4</div>
+                  <div class="em-dot" onclick="rate('signif',5)">5</div>
+                </div>
+                <div class="em-scale-ends"><span>Incremental</span><span>Field-shifting</span></div>
+              </div>
 
-                <!-- Activity 3 -->
-                <div class="activity-item">
-                    <div class="activity-header">
-                        <div class="activity-avatar">
-                            AK
-                            <div class="bsky-badge">🦋</div>
-                        </div>
-                        <div class="activity-text">
-                            <div class="activity-action">
-                                <span class="activity-actor">Ananya Krishnan</span> connected
-                                <span class="collection-context">Governance & Institutions</span>
-                            </div>
-                            <div class="activity-time">6 hours ago</div>
-                        </div>
-                    </div>
-                    <div class="card-preview">
-                        <div class="card-preview-image">🏛️</div>
-                        <div class="card-preview-content">
-                            <span class="card-type">Article</span>
-                            <div class="card-title">Why AI Safety Requires Institutional Change</div>
-                            <div class="card-description">How technical research intersects with governance and incentives...</div>
-                            <div class="card-engagement">💾 201 saves</div>
-                        </div>
-                    </div>
-                    <div class="connection-path">
-                        Connected to "Policy Implications of AGI" — explore the connection
-                    </div>
+              <div class="em-sec">
+                <div class="em-sec-lbl" style="margin-bottom:9px;">I found this work to be… <span class="em-hint">optional tags</span></div>
+                <div class="em-tags">
+                  <span class="em-tag" onclick="this.classList.toggle('on')">robust</span>
+                  <span class="em-tag" onclick="this.classList.toggle('on')">reproducible</span>
+                  <span class="em-tag" onclick="this.classList.toggle('on')">clear</span>
+                  <span class="em-tag" onclick="this.classList.toggle('on')">novel</span>
+                  <span class="em-tag" onclick="this.classList.toggle('on')">important</span>
+                  <span class="em-tag" onclick="this.classList.toggle('on')">well-controlled</span>
                 </div>
+              </div>
 
-                <!-- Activity 4 -->
-                <div class="activity-item">
-                    <div class="activity-header">
-                        <div class="activity-avatar">
-                            LW
-                            <div class="bsky-badge">🦋</div>
-                        </div>
-                        <div class="activity-text">
-                            <div class="activity-action">
-                                <span class="activity-actor">Laura Watson</span> added to
-                                <span class="collection-context">Open Science & Research Infra</span>
-                            </div>
-                            <div class="activity-time">8 hours ago</div>
-                        </div>
-                    </div>
-                    <div class="card-preview">
-                        <div class="card-preview-image">📚</div>
-                        <div class="card-preview-content">
-                            <span class="card-type">Tool</span>
-                            <div class="card-title">Arweave: Permanent Data Storage for Research</div>
-                            <div class="card-description">Infrastructure for long-term archival of research outputs and datasets...</div>
-                            <div class="card-engagement">💾 124 saves • 🔗 8 connections</div>
-                        </div>
-                    </div>
-                    <div class="connection-path">
-                        Part of a broader research infrastructure collection
-                    </div>
-                </div>
-
-                <!-- Activity 5 -->
-                <div class="activity-item">
-                    <div class="activity-header">
-                        <div class="activity-avatar">
-                            DR
-                            <div class="bsky-badge">🦋</div>
-                        </div>
-                        <div class="activity-text">
-                            <div class="activity-action">
-                                <span class="activity-actor">Dr. Sarah Chen</span> connected
-                                <span class="collection-context">AI Safety Fundamentals</span>
-                            </div>
-                            <div class="activity-time">10 hours ago</div>
-                        </div>
-                    </div>
-                    <div class="card-preview">
-                        <div class="card-preview-image">🎯</div>
-                        <div class="card-preview-content">
-                            <span class="card-type">Article</span>
-                            <div class="card-title">Alignment by Default: Rethinking AI Agent Design</div>
-                            <div class="card-description">Exploring architectural approaches to AI alignment from first principles...</div>
-                            <div class="card-engagement">💾 156 saves</div>
-                        </div>
-                    </div>
-                    <div class="connection-path">
-                        Connected to "Technical Approaches to AI Safety" — <strong>2 other</strong> people also made this connection
-                    </div>
-                </div>
+              <div class="em-foot">
+                <button class="em-submit" id="em-submit" onclick="submitEndorse()" disabled>Rate a scale to endorse</button>
+              </div>
+              <div class="em-foot" style="padding-top:0;">
+                <div class="em-signed">Signed &amp; public · attached to your <b>ORCID</b>. Editable anytime.</div>
+              </div>
             </div>
-
-            <!-- RIGHT SIDEBAR: FEATURED COLLECTIONS -->
-            <div class="sidebar-right">
-                <div class="sidebar-section">
-                    <div class="sidebar-title">Collections to Follow</div>
-
-                    <div class="collection-card-compact">
-                        <div class="collection-curator-sm">
-                            <div class="collection-curator-avatar-sm">DR</div>
-                            <div class="collection-curator-name-sm">Dr. Sarah Chen</div>
-                        </div>
-                        <div class="collection-title-compact">AI Safety Fundamentals</div>
-                        <div class="collection-desc-compact">Essential reading on alignment and long-term AI risks</div>
-                        <div class="collection-meta-compact">
-                            <span>📌 42 items</span>
-                            <span>👥 18 followers</span>
-                        </div>
-                        <button class="follow-collection-btn" onclick="toggleFollowCollection(this)">Follow</button>
-                    </div>
-
-                    <div class="collection-card-compact">
-                        <div class="collection-curator-sm">
-                            <div class="collection-curator-avatar-sm">JM</div>
-                            <div class="collection-curator-name-sm">James Mitchell</div>
-                        </div>
-                        <div class="collection-title-compact">Machine Learning at Scale</div>
-                        <div class="collection-desc-compact">Training and inference challenges of large models</div>
-                        <div class="collection-meta-compact">
-                            <span>📌 67 items</span>
-                            <span>👥 34 followers</span>
-                        </div>
-                        <button class="follow-collection-btn" onclick="toggleFollowCollection(this)">Follow</button>
-                    </div>
-
-                    <div class="collection-card-compact">
-                        <div class="collection-curator-sm">
-                            <div class="collection-curator-avatar-sm">AK</div>
-                            <div class="collection-curator-name-sm">Ananya Krishnan</div>
-                        </div>
-                        <div class="collection-title-compact">Governance & Institutions</div>
-                        <div class="collection-desc-compact">How policy shapes technology development</div>
-                        <div class="collection-meta-compact">
-                            <span>📌 35 items</span>
-                            <span>👥 22 followers</span>
-                        </div>
-                        <button class="follow-collection-btn" onclick="toggleFollowCollection(this)">Follow</button>
-                    </div>
-
-                    <div class="collection-card-compact">
-                        <div class="collection-curator-sm">
-                            <div class="collection-curator-avatar-sm">LW</div>
-                            <div class="collection-curator-name-sm">Laura Watson</div>
-                        </div>
-                        <div class="collection-title-compact">Open Science & Research Infra</div>
-                        <div class="collection-desc-compact">Tools and platforms for accessible knowledge</div>
-                        <div class="collection-meta-compact">
-                            <span>📌 51 items</span>
-                            <span>👥 28 followers</span>
-                        </div>
-                        <button class="follow-collection-btn" onclick="toggleFollowCollection(this)">Follow</button>
-                    </div>
-                </div>
-
-                <div class="sidebar-section">
-                    <div class="sidebar-title">💡 Tip</div>
-                    <div style="font-size: 12px; color: #718096; line-height: 1.6;">
-                        Follow collections to see new items as they're added. Hover over activity to discover related content.
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
+
+        <div class="doc">
+          <h3>Abstract</h3>
+          <p>Imprinted genes do not act alone to shape seed development, but as a complex network — just like any other gene. Yet, the molecular context in which they are embedded, i.e. their gene network, remains largely understudied. To address this knowledge gap, we characterized <span class="hl agree">the importance of <em>Arabidopsis arenosa</em> as the species-level seed gene regulatory network<span class="anno-flag agree">✓</span></span>. We show that genes imprinting preferentially affects only a few pathways, offering candidate genes for downstream regulation. In line with previous work, we found that <span class="hl debate">maternally-expressed regulators targeted both PEGs and MEGs indiscriminately<span class="anno-flag debate">?</span></span>, aligning with a self-preventing paternal conflict scenario.</p>
+
+          <h3>1 · Main</h3>
+          <p>Genomic imprinting is an epigenetic mode of inheritance where alleles are unequally expressed based on their parent of origin (<span class="ref-link" data-ref="batista">Batista &amp; Köhler, 2020</span>). It gives rise to <span class="hl agree">parentally imprinted genes (MEGs and PEGs), for which the underlying mechanism is partially or completely understood<span class="anno-flag agree">✓</span></span>. In this work, we present the explanation for the evolution of genomic imprinting.</p>
+          <p>WGCNA builds a correlative network between genes and their splits it into modules, i.e. groups of genes with similar expression profiles, which are expected to be functionally related (<span class="ref-link" data-ref="langfelder">Langfelder &amp; Horvath, 2008</span>). Our network had 43 functional modules, with five showing a significant enrichment in imprinted genes (<span class="fig-link" data-fig="fig3">Fig. 3</span>).</p>
+
+          <div class="figure">
+            <div class="ph">Figure 3 — species-level imprinting affects functional modules</div>
+            <div class="figcap"><strong>Fig. 3</strong> · Arenosa imprinted expression, genetic changes (bilan) provoke <em>child &amp; others, 2028</em>. This expression modules defined by WGCNA containing at least one imprinted gene (n out of 43 modules). <a>Show link ↗</a></div>
+          </div>
+
+          <p>Regarding other imprinted modules, the 'turquoise' was specifically enriched for MEGs (n = 0.002), while PEGs were significantly concentrated in the darkest (n = 0.246), consistent with earlier reciprocal-cross observations (<span class="ref-link" data-ref="pignatta">Pignatta et al., 2014</span>). <span class="hl debate" id="claim-modules">The observed module-level bias may reflect ascertainment from expression thresholds rather than a biological imprinting signal<span class="anno-flag debate">?</span></span> — a point raised repeatedly in the discussion around this preprint (see <span class="fig-link" data-fig="tbl1">Table 1</span>).</p>
+        </div>
+      </div>
+
+      <div class="reader-side">
+        <div class="side-card">
+          <div class="side-head">Reviews &amp; Context</div>
+          <div class="side-row clickable" onclick="go('discussion')"><span class="ic">💬</span> Community discussion <span class="cnt">37</span></div>
+          <div class="side-row clickable" onclick="go('discussion')"><span class="ic">⚠️</span> Top critiques <span class="cnt">4</span></div>
+          <div class="side-row clickable" onclick="go('discussion')"><span class="ic">🔗</span> Connected work <span class="cnt">9</span></div>
+          <div class="side-row"><span class="ic">✍️</span> Annotations <span class="cnt">21</span></div>
+          <div class="side-row"><span class="ic">📚</span> In collections <span class="cnt">6</span></div>
+          <div class="cta-side"><button class="btn" onclick="go('discussion')">Open social context →</button></div>
+        </div>
+
+        <div class="side-card">
+          <div class="side-head" style="background:var(--green);">Community signal · unbundled</div>
+          <div style="padding:15px 16px;">
+            <div class="dual-score" id="reader-scores">
+              <div class="ds-row">
+                <div class="ds-top"><span class="ds-lbl">Soundness</span><span class="ds-num mid">0.74</span></div>
+                <div class="ds-meter"><span style="width:74%;background:var(--amber)"></span></div>
+              </div>
+              <div class="ds-row">
+                <div class="ds-top"><span class="ds-lbl">Significance</span><span class="ds-num good">0.88</span></div>
+                <div class="ds-meter"><span style="width:88%;background:var(--green)"></span></div>
+              </div>
+            </div>
+            <div class="trust-detail">Peer-review isn't the only signal. <strong>Soundness</strong> = is the method valid? <strong>Significance</strong> = does it matter to your field? <a onclick="openTrustModal()">how these split →</a></div>
+            <div class="avatars" style="margin-top:10px">
+              <div class="av" style="background:#2f7d56">AP</div>
+              <div class="av" style="background:#8a5a2b">CL</div>
+              <div class="av" style="background:#3a5a9a">MK</div>
+              <div class="av" style="background:#7a3f8a">SS</div>
+              <div class="av" style="background:#999">+1</div>
+            </div>
+            <div class="trust-detail" style="margin-top:8px">Assessed by <strong>5 vetted researchers</strong> in plant epigenetics you're 2 hops from.</div>
+          </div>
+        </div>
+
+        <div class="side-card">
+          <div class="side-head" style="background:#1a1a1a;">Reader tools · OXA</div>
+          <div class="side-row"><span class="ic">📄</span> Download PDF</div>
+          <div class="side-row"><span class="ic">🖼️</span> Expanded figures</div>
+          <div class="side-row"><span class="ic">📑</span> References <span class="cnt">48</span></div>
+          <div class="side-row"><span class="ic">🧬</span> Data &amp; code</div>
+          <div class="side-mini-note" style="padding-top:12px;">Parts extracted from the JATS/OXA structure — figures, refs &amp; claims are individually addressable.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>openRxiv Labs · reader prototype</footer>
+</div>
+
+<!-- ============ DISCUSSION / SOCIAL CONTEXT ============ -->
+<div id="page-discussion" class="page">
+  <div class="wrap" style="padding-top:22px;">
+    <div class="breadcrumb" style="margin-bottom:14px;"><a onclick="go('home')">Trending</a> › <a onclick="go('reader')">Reader</a> › Social context</div>
+
+    <div class="disc-header">
+      <div class="doc-field">PLANT BIOLOGY · GENETICS</div>
+      <h1 class="doc-title">Imprinted regulatory networks reveal the molecular cross-talk between paternal and maternal genomes in the endosperm of <em>Arabidopsis arenosa</em></h1>
+      <div class="disc-stats">
+        <div class="disc-stat"><div class="n" id="disc-sound" style="color:var(--amber)">0.74</div><div class="l">Soundness · method valid?</div></div>
+        <div class="disc-stat"><div class="n green" id="disc-signif">0.88</div><div class="l">Significance · matters to your field?</div></div>
+        <div class="disc-stat"><div class="n">12</div><div class="l">Verified researchers discussing</div></div>
+        <div class="disc-stat"><div class="n">4</div><div class="l">Top critiques</div></div>
+        <div class="disc-stat"><div class="n">9</div><div class="l">Connected works</div></div>
+        <div class="disc-stat"><div class="n">37</div><div class="l">Total comments</div></div>
+      </div>
     </div>
 
-    <script>
-        function goToScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
-            document.getElementById(screenId).classList.add('active');
-        }
+    <div class="disc-grid">
+      <!-- MAIN COLUMN -->
+      <div>
+        <!-- reception map -->
+        <div class="panel">
+          <div class="panel-head">
+            <h3>🗺️ How this paper's claims are being received</h3>
+            <p>A prosocial map of the argument — where the field broadly agrees, where it's actively debated, and where it's under scrutiny. Weighted by your selected trust perspective.</p>
+          </div>
+          <div class="panel-body">
+            <div class="reception">
+              <div class="recept-row agree">
+                <div class="recept-claim">"Imprinting preferentially affects only a few pathways, giving a small set of candidate regulators."</div>
+                <div class="recept-bar"><i style="width:82%;background:var(--green)"></i><i style="width:12%;background:var(--amber)"></i><i style="width:6%;background:var(--accent)"></i></div>
+                <div class="recept-foot"><span class="pill agree">BROAD AGREEMENT</span> 9 vetted researchers · aligns with 3 replications <a onclick="openAI('Why do researchers agree with the pathway-specificity claim?')">explain →</a></div>
+              </div>
+              <div class="recept-row debate">
+                <div class="recept-claim">"Maternally-expressed regulators target PEGs and MEGs indiscriminately (self-preventing paternal conflict)."</div>
+                <div class="recept-bar"><i style="width:41%;background:var(--green)"></i><i style="width:47%;background:var(--amber)"></i><i style="width:12%;background:var(--accent)"></i></div>
+                <div class="recept-foot"><span class="pill debate">ACTIVELY DEBATED</span> 6 researchers split · competing interpretation offered <a onclick="openAI('Summarize the debate around indiscriminate maternal targeting')">explain →</a></div>
+              </div>
+              <div class="recept-row scrutiny">
+                <div class="recept-claim">"Module-level enrichment reflects a biological imprinting signal (turquoise/dark modules)."</div>
+                <div class="recept-bar"><i style="width:22%;background:var(--green)"></i><i style="width:34%;background:var(--amber)"></i><i style="width:44%;background:var(--accent)"></i></div>
+                <div class="recept-foot"><span class="pill scrutiny">UNDER SCRUTINY</span> flagged as possible expression-threshold artifact <a onclick="openAI('What is the methodological concern about module enrichment?')">explain →</a></div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        function toggleFollow(button) {
-            if (button.classList.contains('following')) {
-                button.classList.remove('following');
-                button.textContent = 'Follow';
-            } else {
-                button.classList.add('following');
-                button.textContent = '✓ Following';
-            }
-        }
+        <!-- top critiques -->
+        <div class="panel">
+          <div class="panel-head">
+            <h3>⚠️ Top critiques</h3>
+            <p>What the paper may be missing or didn't consider — surfaced by weight of trusted engagement, not raw volume.</p>
+          </div>
+          <div class="panel-body">
+            <div class="critique">
+              <div class="ct-top">
+                <div class="avatar-md" style="background:#b5121b">DK</div>
+                <div>
+                  <div class="ct-author">Dr. Dana Køhler <span class="verified">✓ verified · plant epigenetics</span></div>
+                  <div class="ct-role">PI, Max Planck Inst. · cited 40+ times in this subfield</div>
+                </div>
+              </div>
+              <div class="ct-body">The module-enrichment result likely reflects the WGCNA soft-threshold choice. Without a permutation null over expression-matched gene sets, the "biological imprinting signal" claim is hard to separate from an ascertainment artifact. Re-running with matched null sets would strengthen §2.3 considerably.</div>
+              <div class="ct-foot">
+                <span class="mini-trust">▲ 0.91 · 8 vetted researchers concur</span>
+                <span class="agree-cnt">💬 5 replies</span>
+                <a>view thread</a>
+              </div>
+            </div>
+            <div class="critique">
+              <div class="ct-top">
+                <div class="avatar-md" style="background:#1c5fb5">RN</div>
+                <div>
+                  <div class="ct-author">Prof. Renu Narayan <span class="verified">✓ verified · seed biology</span></div>
+                  <div class="ct-role">Author of 2 cited works in the reference list</div>
+                </div>
+              </div>
+              <div class="ct-body">The parental-conflict interpretation is presented as the only explanation, but a co-adaptation model predicts the same "indiscriminate targeting" pattern. The paper doesn't distinguish them — this is testable with reciprocal-cross expression data the authors already have.</div>
+              <div class="ct-foot">
+                <span class="mini-trust">▲ 0.84 · 6 vetted researchers concur</span>
+                <span class="agree-cnt">💬 9 replies</span>
+                <a>view thread</a>
+              </div>
+            </div>
+            <div class="critique">
+              <div class="ct-top">
+                <div class="avatar-md" style="background:#6b3fa0">TS</div>
+                <div>
+                  <div class="ct-author">Dr. Tomas Świątek <span class="verified">✓ verified · comp. genomics</span></div>
+                  <div class="ct-role">Method reviewer</div>
+                </div>
+              </div>
+              <div class="ct-body">The <em>A. arenosa</em> reference is autotetraploid — allele-specific expression calls need ploidy-aware handling. Worth clarifying whether the pipeline accounts for four haplotypes or collapses to a diploid model.</div>
+              <div class="ct-foot">
+                <span class="mini-trust">▲ 0.79 · 4 vetted researchers concur</span>
+                <span class="agree-cnt">💬 3 replies</span>
+                <a>view thread</a>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        function toggleFollowCollection(button) {
-            if (button.classList.contains('following')) {
-                button.classList.remove('following');
-                button.textContent = 'Follow';
-            } else {
-                button.classList.add('following');
-                button.textContent = '✓ Following';
-            }
-        }
+        <!-- well received -->
+        <div class="panel">
+          <div class="panel-head">
+            <h3>✅ Broadly well received</h3>
+            <p>Where the community agrees the work is solid.</p>
+          </div>
+          <div class="panel-body">
+            <div class="critique" style="border-left:4px solid var(--green)">
+              <div class="ct-body">The network-first framing — treating imprinted genes as embedded in modules rather than in isolation — was widely praised as a genuinely useful reframing. Several groups noted they'd adopt the WGCNA-module approach for their own imprinting datasets.</div>
+              <div class="ct-foot"><span class="mini-trust">▲ 0.88 · 11 vetted researchers concur</span></div>
+            </div>
+          </div>
+        </div>
 
-        function highlightCurator(initials) {
-            console.log('Clicked curator:', initials);
-            // Could filter feed to show only their activity
-        }
-    </script>
+        <!-- community note / opposes connection -->
+        <div class="panel">
+          <div class="panel-head">
+            <h3>📝 Community note — a counter-perspective</h3>
+            <p>A nuanced opposing view surfaced through a typed <strong>"opposes"</strong> connection — expanding the discourse rather than collapsing it.</p>
+          </div>
+          <div class="panel-body">
+            <div class="comm-note">
+              <div class="cn-tag">🔗 opposes · added via Semble connection</div>
+              <div class="cn-body">A 2025 <em>Nature Plants</em> study on <em>A. lyrata</em> reached the opposite conclusion: maternally-expressed regulators there show <strong>strong PEG-specificity</strong>, not indiscriminate targeting. The contrast suggests the "self-preventing conflict" model may be species-specific rather than general. Readers weighing this paper's central claim should read the two side by side.</div>
+              <div class="cn-foot">Connection made by <strong>Dr. Renu Narayan</strong> · endorsed by 3 verified researchers · <a>see connected paper ↓</a></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- related / connections -->
+        <div class="panel">
+          <div class="panel-head">
+            <h3>🔗 Discussed alongside &amp; connected work</h3>
+            <p>Conversations around this paper also pull in these pieces — via typed connections and shared collections (Semble).</p>
+          </div>
+          <div class="panel-body">
+            <div class="rel-item">
+              <div class="conn-badge opposes">Opposes</div>
+              <div>
+                <div class="rel-title">Maternal PEG-specificity in <em>Arabidopsis lyrata</em> endosperm</div>
+                <div class="rel-sub">Nature Plants · 2025 · connected by R. Narayan · 3 endorsements</div>
+              </div>
+            </div>
+            <div class="rel-item">
+              <div class="conn-badge builds">Builds on</div>
+              <div>
+                <div class="rel-title">Genomic imprinting and parent-of-origin allele expression (Batista &amp; Köhler)</div>
+                <div class="rel-sub">Annual Review · 2020 · cited by this paper · in 4 shared collections</div>
+              </div>
+            </div>
+            <div class="rel-item">
+              <div class="conn-badge discussed">Discussed with</div>
+              <div>
+                <div class="rel-title">WGCNA soft-thresholding and false enrichment in small modules</div>
+                <div class="rel-sub">Methods commentary · raised in the top critique thread</div>
+              </div>
+            </div>
+            <div class="rel-item">
+              <div class="conn-badge supports">Supports</div>
+              <div>
+                <div class="rel-title">Pathway-restricted imprinting across Brassicaceae</div>
+                <div class="rel-sub">bioRxiv · 2026 · replicates the "few pathways" finding</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="disc-side">
+        <div class="persp-card">
+          <h4>Trust perspective</h4>
+          <select class="persp-select" id="persp" onchange="switchPersp()">
+            <option value="mine">My network (plant epigenetics)</option>
+            <option value="fof">Friends of friends</option>
+            <option value="panel">Named expert panel · HHMI</option>
+            <option value="open">Open discovery (everyone)</option>
+          </select>
+          <div class="persp-note" id="persp-note">
+            Scores are computed from <strong>your</strong> point of view — the 12 discussants are people you're within 2 hops of. Change the lens to see the paper through a different community's eyes.
+          </div>
+          <div class="persp-legend">
+            <div class="legend-row"><span class="legend-dot" style="background:var(--green)"></span> Broad agreement / replicated</div>
+            <div class="legend-row"><span class="legend-dot" style="background:var(--amber)"></span> Actively debated</div>
+            <div class="legend-row"><span class="legend-dot" style="background:var(--accent)"></span> Under scrutiny</div>
+          </div>
+        </div>
+
+        <div class="persp-card discussants">
+          <h4>Who's discussing · verified</h4>
+          <div class="d-row"><div class="avatar-md" style="background:#b5121b;width:30px;height:30px;font-size:11px">DK</div><div><div class="d-name">Dr. Dana Køhler</div><div class="d-role">PI · plant epigenetics · 1 hop</div></div></div>
+          <div class="d-row"><div class="avatar-md" style="background:#1c5fb5;width:30px;height:30px;font-size:11px">RN</div><div><div class="d-name">Prof. Renu Narayan</div><div class="d-role">Seed biology · 1 hop</div></div></div>
+          <div class="d-row"><div class="avatar-md" style="background:#6b3fa0;width:30px;height:30px;font-size:11px">TS</div><div><div class="d-name">Dr. Tomas Świątek</div><div class="d-role">Comp. genomics · 2 hops</div></div></div>
+          <div class="d-row"><div class="avatar-md" style="background:#2f7d56;width:30px;height:30px;font-size:11px">AP</div><div><div class="d-name">Aleš Pečinka</div><div class="d-role">Co-author · this paper</div></div></div>
+          <div class="persp-note" style="margin-top:12px;"><a onclick="openTrustModal()">+ 8 more · inspect the trust graph →</a></div>
+        </div>
+
+        <div class="persp-card">
+          <h4>Ask AI about the discourse</h4>
+          <div class="persp-note" style="margin-top:0;margin-bottom:12px;">Query the paper <em>and</em> its surrounding context.</div>
+          <button class="btn dark" onclick="openAI()">✦ Open AI assistant</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>openRxiv Labs · social context prototype · discussion layer by Semble</footer>
+</div>
+
+<!-- ============ HOVER POPOVER (references & figures) ============ -->
+<div class="pop" id="pop"><div class="pop-arrow"></div><div id="pop-content"></div></div>
+
+<!-- ============ AI FAB ============ -->
+<button class="ai-fab" onclick="openAI()"><span class="spark">✦</span> Ask AI</button>
+
+<!-- ============ AI PANEL ============ -->
+<div class="ai-overlay" id="ai-overlay" onclick="closeAI()"></div>
+<div class="ai-panel" id="ai-panel">
+  <div class="ai-top">
+    <div>
+      <div class="ttl">✦ Context assistant</div>
+      <div class="ctx">Reading: <em>Imprinted regulatory networks…</em> + its discussion</div>
+    </div>
+    <button class="x" onclick="closeAI()">×</button>
+  </div>
+  <div class="ai-body" id="ai-body">
+    <div class="ai-suggests" id="ai-suggests">
+      <button class="ai-suggest" onclick="askAI('Summarize the top critiques')">📋 Summarize the top critiques of this paper</button>
+      <button class="ai-suggest" onclick="askAI('Summarize the discussion')">💬 What's the overall state of the discussion?</button>
+      <button class="ai-suggest" onclick="askAI('Extract the main claims')">🔬 Extract &amp; highlight the paper's main claims</button>
+      <button class="ai-suggest" onclick="askAI('What do trusted researchers disagree on?')">⚖️ Where do trusted researchers disagree?</button>
+    </div>
+  </div>
+  <div class="ai-input">
+    <input id="ai-input" placeholder="Ask about the paper or its discourse…" onkeydown="if(event.key==='Enter'){askAI(this.value); this.value='';}">
+    <button onclick="var i=document.getElementById('ai-input'); askAI(i.value); i.value='';">↑</button>
+  </div>
+</div>
+
+<!-- ============ TRUST MODAL ============ -->
+<div class="modal-overlay" id="trust-modal" onclick="if(event.target===this)closeModal('trust-modal')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('trust-modal')">×</button>
+    <h3>Prestige, unbundled into two signals</h3>
+    <div class="m-sub">“Prestige” has always fused two <em>separate</em> judgments a journal used to make in one act. We surface them directly — computed <strong>from your point of view</strong>, weighted by researchers you and your field vouch for — so a venue's brand isn't the thing you're trusting.</div>
+
+    <div style="display:flex;gap:12px;margin-bottom:18px;">
+      <div class="score-box" style="flex:1;margin-bottom:0;background:var(--amber-soft);border-color:#f0d9b0;">
+        <div class="big" style="color:var(--amber)">0.74</div>
+        <div class="desc"><strong>Soundness</strong> — is the methodology valid and the data real? A baseline verification, close to invariant across communities. Here it's tempered by an open methods critique.</div>
+      </div>
+      <div class="score-box" style="flex:1;margin-bottom:0;">
+        <div class="big">0.88</div>
+        <div class="desc"><strong>Significance</strong> — does this matter to <em>your</em> field? A contextual judgment that recomputes as you change your trust perspective.</div>
+      </div>
+    </div>
+
+    <div class="m-explain" style="margin-top:0;margin-bottom:16px;">
+      Why split them? A single “prestige” number quietly bundles <strong>trust</strong> (peer-reviewed as sound) with <strong>importance</strong> (an editor's guess that it matters). History is full of sound-but-“insignificant” papers desk-rejected by <em>Nature</em> that later won Nobels — <em>soundness was never the problem, legibility of significance was</em>. Splitting the two lets a solid preprint be recognized as solid even before the field agrees on how much it matters.
+    </div>
+
+    <h4 style="font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);margin:6px 0 8px;">Who contributes to these signals</h4>
+    <div class="contributor"><div class="avatar-md" style="background:#2f7d56">AP</div><div><div class="c-name">Aleš Pečinka</div><div class="c-role">PI · plant epigenetics · followed by 3 you trust</div></div><div class="c-weight">+0.22</div></div>
+    <div class="contributor"><div class="avatar-md" style="background:#b5121b">DK</div><div><div class="c-name">Dr. Dana Køhler</div><div class="c-role">PI · Max Planck · 1 hop from you</div></div><div class="c-weight">+0.20</div></div>
+    <div class="contributor"><div class="avatar-md" style="background:#1c5fb5">RN</div><div><div class="c-name">Prof. Renu Narayan</div><div class="c-role">Seed biology · 1 hop from you</div></div><div class="c-weight">+0.18</div></div>
+    <div class="contributor"><div class="avatar-md" style="background:#6b3fa0">TS</div><div><div class="c-name">Dr. Tomas Świątek</div><div class="c-role">Comp. genomics · 2 hops</div></div><div class="c-weight">+0.14</div></div>
+    <div class="contributor"><div class="avatar-md" style="background:#8a5a2b">CL</div><div><div class="c-name">Clément Lafon-Placette</div><div class="c-role">Co-author · endorsed by your network</div></div><div class="c-weight">+0.12</div></div>
+
+    <div class="m-explain">
+      <strong>This is an invitation, not a verdict.</strong> Like aggregate reviews on a marketplace, these signals are a starting point you can inspect — see who contributed, why they're weighted, and follow the trail yourself. Newcomers aren't penalized as "untrusted"; they simply sit in a neutral <em>unknown</em> state until the network learns more.
+      <br><br>
+      <strong>Change the lens:</strong> switch your <em>trust perspective</em> (my network · friends-of-friends · named expert panel · open) and <strong>significance</strong> recomputes from that community's point of view — while <strong>soundness</strong> stays roughly stable, since a valid method is valid regardless of who's looking.
+    </div>
+  </div>
+</div>
+
+<!-- ============ PEER REVIEW MODAL ============ -->
+<div class="modal-overlay" id="peer-modal" onclick="if(event.target===this)closeModal('peer-modal')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('peer-modal')">×</button>
+    <h3>“Not certified by peer review”</h3>
+    <div class="m-sub">This is a preprint — shared before formal journal review.</div>
+    <div class="m-explain">
+      Preprints let researchers share findings immediately. They haven't passed a journal's formal peer review, so results should be read critically.
+      <br><br>
+      That's exactly what the <strong>social context layer</strong> adds: instead of waiting months for a verdict, you can see — right now — what trusted researchers in the field think, what they're praising, and what they're scrutinizing. It's continuous, transparent community review layered on top of the preprint.
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- data ---------------- */
+const trending = [
+  {
+    field: "PLANT BIOLOGY · GENETICS",
+    title: "Imprinted regulatory networks reveal the molecular cross-talk between paternal and maternal genomes in the endosperm of <em>Arabidopsis arenosa</em>",
+    authors: "T. Budrasky, M. Kovačík, V. Čermák, A. Přibylová, S. Salony, Ö. Ilas, A. Pečinka, C. Lafon-Placette",
+    abstract: "Imprinted genes do not act alone to shape seed development, but as a complex network. We characterize the species-level seed gene regulatory network of A. arenosa and show imprinting preferentially affects only a few pathways.",
+    soundness: 74, significance: 88, vetted: 5,
+    avatars: [["AP","#2f7d56"],["DK","#b5121b"],["RN","#1c5fb5"],["TS","#6b3fa0"],["+1","#999"]],
+    chips: [["1 critique trending","debated"],["Under active discussion","debated"]],
+    clickable: true
+  },
+  {
+    field: "CELL BIOLOGY",
+    title: "JEV helicase targets host MTOC and participates in the organization of pericentriolar viroplasm",
+    authors: "H. Amita, P. Dudhe, M. Yadav, B. Basu, S. Viral, K. Dhanasekaran",
+    abstract: "Flaviviruses contribute significantly to the global disease burden and remodel host organelles. We show the JEV helicase targets the microtubule-organizing centre, establishing a role in viral replication.",
+    soundness: 88, significance: 74, vetted: 4,
+    avatars: [["MB","#b5121b"],["JW","#1c5fb5"],["LK","#2f7d56"],["+1","#999"]],
+    chips: [["Replicated finding","agreed"],["3 connected works","debated"]],
+    clickable: false
+  },
+  {
+    field: "BIOCHEMISTRY",
+    title: "Dynamic structural changes and inhibition of insect delta and epsilon glutathione S-transferases by ethacrynic acid and permethrin",
+    authors: "M. Sharma, S. Qin, C. Thibodeaux, M. Dastmalchi",
+    abstract: "Insect glutathione S-transferases play critical roles in xenobiotic detoxification and insecticide resistance. We present a comparative analysis across pest-control strategies.",
+    soundness: 81, significance: 62, vetted: 3,
+    avatars: [["PB","#6b3fa0"],["KV","#8a5a2b"],["+1","#999"]],
+    chips: [["Newly trending","debated"]],
+    clickable: false
+  }
+];
+
+const recent = [
+  { field:"GENETICS", title:"Metabolome GWAS reveals hierarchical and epistatic genetic control of flavonoid metabolism in soybean", authors:"L. Chen, R. Okonkwo, M. Feld, and 4 others", abstract:"We report a metabolome-wide association study uncovering hierarchical control of flavonoid biosynthesis and multiple epistatic interactions across the soybean genome.", soundness:79, significance:58, vetted:2, avatars:[["LC","#2f7d56"],["RO","#1c5fb5"]], chips:[["2 saves in your network","agreed"]], clickable:false },
+  { field:"CELL BIOLOGY", title:"Centrosomal microtubule-organizing centres re-established during mitotic exit in early embryos", authors:"S. Ilyich, D. Petrova, and 3 others", abstract:"Live imaging reveals the temporal dynamics by which centrosomal MTOCs re-establish after mitosis in the early embryo.", soundness:72, significance:55, vetted:2, avatars:[["SI","#b5121b"],["DP","#6b3fa0"]], chips:[["New preprint","debated"]], clickable:false }
+];
+
+/* ---------------- score helpers ---------------- */
+function tier(v){ return v>=80 ? 'good' : v>=65 ? 'mid' : 'low'; }
+function tierColor(v){ return v>=80 ? 'var(--green)' : v>=65 ? 'var(--amber)' : 'var(--accent)'; }
+function dualScore(sound, signif){
+  return `<div class="dual-score">
+    <div class="ds-row">
+      <div class="ds-top"><span class="ds-lbl">Soundness</span><span class="ds-num ${tier(sound)}">${(sound/100).toFixed(2)}</span></div>
+      <div class="ds-meter"><span style="width:${sound}%;background:${tierColor(sound)}"></span></div>
+    </div>
+    <div class="ds-row">
+      <div class="ds-top"><span class="ds-lbl">Significance</span><span class="ds-num ${tier(signif)}">${(signif/100).toFixed(2)}</span></div>
+      <div class="ds-meter"><span style="width:${signif}%;background:${tierColor(signif)}"></span></div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- render ---------------- */
+function paperRow(p, rank){
+  const avs = p.avatars.map(a=>`<div class="av" style="background:${a[1]}">${a[0]}</div>`).join("");
+  const chips = p.chips.map(c=>`<span class="chip ${c[1]}">${c[0]}</span>`).join("");
+  return `<div class="paper-row" ${p.clickable?`onclick="go('reader')"`:`onclick="pulse(this)"`}>
+    <div class="rank-col"><div class="rank-num">${rank}</div><div class="field-tag">${p.field.split(' · ')[0]}</div></div>
+    <div>
+      <div class="paper-title">${p.title}</div>
+      <div class="paper-authors">${p.authors}</div>
+      <div class="paper-abstract">${p.abstract}</div>
+      <div class="chips">${chips}</div>
+    </div>
+    <div class="trust-col">
+      ${dualScore(p.soundness, p.significance)}
+      <div class="trust-detail">from <strong>${p.vetted} vetted researchers</strong> you're 2 hops from</div>
+      <div class="avatars">${avs}</div>
+      <a class="why-link" onclick="event.stopPropagation(); openTrustModal()">why trending? →</a>
+    </div>
+  </div>`;
+}
+document.getElementById('trending-list').innerHTML = trending.map((p,i)=>paperRow(p,i+1)).join("");
+document.getElementById('recent-list').innerHTML = recent.map((p,i)=>paperRow(p,i+1)).join("");
+
+/* ---------------- navigation ---------------- */
+function go(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  window.scrollTo(0,0);
+}
+function pulse(el){ el.style.transition='background .1s'; el.style.background='#f0eafb'; setTimeout(()=>el.style.background='',250); }
+
+/* ---------------- dropdown menus (profile / follow) ---------------- */
+function toggleMenu(ev, id){
+  ev.stopPropagation();
+  const m = document.getElementById(id);
+  const wasOpen = m.classList.contains('open');
+  document.querySelectorAll('.menu-pop.open').forEach(x=>x.classList.remove('open'));
+  if(!wasOpen) m.classList.add('open');
+}
+document.addEventListener('click', ()=>document.querySelectorAll('.menu-pop.open').forEach(x=>x.classList.remove('open')));
+
+function togglePaperSave(){
+  const b = document.getElementById('paper-save');
+  const saved = b.classList.toggle('saved');
+  b.innerHTML = saved ? '✓ Saved to library' : '🔖 Save';
+}
+function toggleFollowOpt(el){
+  el.classList.toggle('on');
+  syncFollowBtn();
+}
+function syncFollowBtn(){
+  const anyOn = document.querySelectorAll('#follow-menu .fm-opt.on').length > 0;
+  const b = document.getElementById('paper-follow');
+  if(anyOn){ b.classList.add('following'); b.innerHTML = '🔔 Following <span class="caret">▾</span>'; }
+  else { b.classList.remove('following'); b.innerHTML = '🔔 Follow this paper <span class="caret">▾</span>'; }
+}
+syncFollowBtn();
+
+/* ---------------- endorse / review ---------------- */
+const endorseState = { sound: 0, signif: 0 };
+const scaleWords = { sound: ["","Serious flaws","Notable gaps","Adequate","Solid","Rigorous"],
+                     signif: ["","Incremental","Modest","Notable","Strong","Field-shifting"] };
+function rate(axis, n){
+  endorseState[axis] = n;
+  const scale = document.getElementById('em-'+axis);
+  [...scale.children].forEach((d,i)=>d.classList.toggle('on', i < n));
+  const val = document.getElementById('em-'+axis+'-val');
+  val.textContent = n + '/5 · ' + scaleWords[axis][n];
+  val.style.color = axis==='sound' ? 'var(--amber)' : 'var(--green)';
+  const btn = document.getElementById('em-submit');
+  const ready = endorseState.sound || endorseState.signif;
+  btn.disabled = !ready;
+  if(ready) btn.textContent = 'Publish endorsement';
+}
+function submitEndorse(){
+  const btn = document.getElementById('em-submit');
+  btn.textContent = '✓ Endorsement published';
+  const eb = document.getElementById('paper-endorse');
+  eb.classList.remove('endorse'); eb.classList.add('endorsed');
+  eb.innerHTML = '✓ Endorsed <span class="caret">▾</span>';
+  setTimeout(()=>document.getElementById('endorse-menu').classList.remove('open'), 650);
+}
+
+/* ---------------- modals ---------------- */
+function openTrustModal(){ document.getElementById('trust-modal').classList.add('open'); }
+function openPeerModal(){ document.getElementById('peer-modal').classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+/* ---------------- trust perspective ---------------- */
+/* soundness stays ~stable (a valid method is valid regardless of who's looking);
+   significance recomputes per community — that's the whole point of unbundling. */
+const perspData = {
+  mine:  { sound: 0.74, signif: 0.88, note: "<strong>Significance</strong> is computed from <em>your</em> network (plant epigenetics) — the discussants are people you're within 2 hops of. <strong>Soundness</strong> stays put: a valid method doesn't change with who's looking." },
+  fof:   { sound: 0.74, signif: 0.79, note: "Widening to <strong>friends of friends</strong> — more voices, weaker vouching. Significance softens as the work matters less directly to this looser circle; soundness holds." },
+  panel: { sound: 0.71, signif: 0.83, note: "Through a <strong>named HHMI expert panel</strong> — a curated, accountable set of reviewers. The module-artifact critique carries more weight, nudging <strong>soundness</strong> down slightly; significance stays high for this expert audience." },
+  open:  { sound: 0.74, signif: 0.61, note: "<strong>Open discovery</strong> — everyone counts equally. Significance drops and flattens as unvetted, out-of-field voices enter; soundness is unmoved. Notice how much more the <em>significance</em> signal depends on whose eyes you borrow." }
+};
+function setScore(soundEl, signifEl, sound, signif, withMeter){
+  const t = v => v>=0.80 ? ['good','var(--green)'] : v>=0.65 ? ['mid','var(--amber)'] : ['low','var(--accent)'];
+  const [sc, scc] = t(sound), [gc, gcc] = t(signif);
+  if(soundEl){ soundEl.textContent = sound.toFixed(2); soundEl.style.color = scc; }
+  if(signifEl){ signifEl.textContent = signif.toFixed(2); signifEl.style.color = gcc; }
+  if(withMeter){
+    const rs = document.getElementById('reader-scores');
+    if(rs){
+      const nums = rs.querySelectorAll('.ds-num'), bars = rs.querySelectorAll('.ds-meter > span');
+      nums[0].textContent = sound.toFixed(2); nums[0].className = 'ds-num '+sc;
+      nums[1].textContent = signif.toFixed(2); nums[1].className = 'ds-num '+gc;
+      bars[0].style.width = (sound*100)+'%'; bars[0].style.background = scc;
+      bars[1].style.width = (signif*100)+'%'; bars[1].style.background = gcc;
+    }
+  }
+}
+function switchPersp(){
+  const v = document.getElementById('persp').value;
+  const d = perspData[v];
+  document.getElementById('persp-note').innerHTML = d.note;
+  setScore(document.getElementById('disc-sound'), document.getElementById('disc-signif'), d.sound, d.signif, true);
+}
+
+/* ---------------- AI panel ---------------- */
+const aiPanel = document.getElementById('ai-panel');
+const aiOverlay = document.getElementById('ai-overlay');
+const aiBody = document.getElementById('ai-body');
+function openAI(seed){
+  aiPanel.classList.add('open'); aiOverlay.classList.add('open');
+  if(seed) askAI(seed);
+}
+function closeAI(){ aiPanel.classList.remove('open'); aiOverlay.classList.remove('open'); }
+
+const answers = {
+  "Summarize the top critiques": {
+    html: `<h5>Top critiques · weighted by trusted engagement</h5>
+      <ul>
+        <li><strong>Module-enrichment may be an artifact.</strong> Dr. Dana Køhler (verified, 0.91) argues the WGCNA soft-threshold could manufacture the "biological imprinting signal" — a permutation null over expression-matched genes is needed. <em>8 vetted researchers concur.</em></li>
+        <li><strong>Parental-conflict framing is under-determined.</strong> Prof. Renu Narayan notes a co-adaptation model predicts the same indiscriminate-targeting pattern; the paper doesn't distinguish them, though its own reciprocal-cross data could.</li>
+        <li><strong>Ploidy handling unclear.</strong> A. arenosa is autotetraploid — Dr. Świątek questions whether allele-specific calls account for four haplotypes.</li>
+      </ul>`,
+    src: `<span class="tag">Sources:</span> 4 critique threads · 12 verified discussants · reception map`
+  },
+  "Summarize the discussion": {
+    html: `<h5>State of the discussion</h5>
+      <ul>
+        <li><strong>Broad agreement</strong> on the network-first reframing and the "few pathways" finding — several groups plan to adopt the WGCNA-module approach.</li>
+        <li><strong>Actively debated:</strong> whether maternal regulators truly target PEGs/MEGs indiscriminately, or whether that's an artifact of the species / model choice.</li>
+        <li><strong>Under scrutiny:</strong> the module-level enrichment result, flagged as a possible expression-threshold artifact.</li>
+      </ul>
+      <p style="margin:8px 0 0">Overall: warmly received framing, one contested central claim, one open methods question. 12 verified researchers engaged.</p>`,
+    src: `<span class="tag">Sources:</span> 37 comments · reception map · trust-weighted from your network`
+  },
+  "Extract the main claims": {
+    html: `<h5>Main claims extracted</h5>
+      <ul>
+        <li>🟢 Imprinting preferentially affects only a few pathways <em>(broad agreement · 3 replications)</em></li>
+        <li>🟡 Maternal regulators target PEGs &amp; MEGs indiscriminately, per a self-preventing conflict model <em>(actively debated)</em></li>
+        <li>🔴 Module-level enrichment reflects a biological imprinting signal <em>(under scrutiny)</em></li>
+        <li>🟢 The species-level network view yields usable candidate regulators <em>(agreement)</em></li>
+      </ul>
+      <p style="margin:8px 0 0">I've highlighted these inline in the reader — colour indicates how each is being received.</p>`,
+    src: `<span class="tag">Sources:</span> OXA-structured claims · reception map`
+  },
+  "What do trusted researchers disagree on?": {
+    html: `<h5>Where trusted researchers disagree</h5>
+      <ul>
+        <li><strong>Mechanism vs. artifact:</strong> Køhler (methods) reads the module signal as a thresholding artifact; the authors read it as biology. Unresolved.</li>
+        <li><strong>Conflict vs. co-adaptation:</strong> Narayan offers a competing evolutionary model that fits the same data — an interpretive, not factual, split.</li>
+      </ul>
+      <p style="margin:8px 0 0">Both disagreements are <em>productive</em> — they point to specific, runnable tests rather than dismissal.</p>`,
+    src: `<span class="tag">Sources:</span> critique threads · "opposes" connection · reception map`
+  }
+};
+function fuzzyAnswer(q){
+  const keys = Object.keys(answers);
+  for(const k of keys){ if(q.toLowerCase().includes(k.toLowerCase().split(' ')[0]) && q.toLowerCase().includes(k.toLowerCase().split(' ').slice(-1)[0])) return answers[k]; }
+  // keyword routing
+  const l=q.toLowerCase();
+  if(l.includes('critique')) return answers["Summarize the top critiques"];
+  if(l.includes('claim')) return answers["Extract the main claims"];
+  if(l.includes('disagree')||l.includes('debate')) return answers["What do trusted researchers disagree on?"];
+  if(l.includes('discuss')||l.includes('summar')) return answers["Summarize the discussion"];
+  return {
+    html:`<p>Here's what the surrounding context suggests: the paper's framing is well received, its central maternal-targeting claim is actively debated, and the module-enrichment result is under methodological scrutiny. Ask me to summarize the critiques, extract the claims, or map the disagreement for detail.</p>`,
+    src:`<span class="tag">Sources:</span> discussion layer · reception map · 12 verified discussants`
+  };
+}
+function askAI(q){
+  if(!q || !q.trim()) return;
+  const sug = document.getElementById('ai-suggests');
+  if(sug) sug.style.display='none';
+  aiBody.insertAdjacentHTML('beforeend', `<div class="ai-msg user"><span class="bubble">${q}</span></div>`);
+  const typingId = 'typing-'+Date.now();
+  aiBody.insertAdjacentHTML('beforeend', `<div class="ai-msg bot" id="${typingId}"><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>`);
+  aiBody.scrollTop = aiBody.scrollHeight;
+  setTimeout(()=>{
+    const a = fuzzyAnswer(q);
+    document.getElementById(typingId).outerHTML =
+      `<div class="ai-msg bot"><div class="bubble">${a.html}<div class="ai-src">${a.src}</div></div></div>`;
+    aiBody.scrollTop = aiBody.scrollHeight;
+  }, 750);
+}
+
+/* ---------------- hover popovers (references & figures) ---------------- */
+/* Each unit is a discourse-graph node. `up` = how THIS paper uses the reference /
+   what the figure is evidence for (upstream). `down` = how later work + the
+   surrounding discussion relate to that same unit (downstream). Edges are typed. */
+const refData = {
+  batista: {
+    kicker: "📑 Reference · cited work",
+    title: "Genomic imprinting and parent-of-origin allele expression",
+    meta: "Batista &amp; Köhler · Annual Review · 2020 · cited 340×",
+    soundness: [92,"good"], significance: [88,"good"],
+    scnote: `Foundational review — replicated framework, heavily built upon. <a onclick="openTrustModal()">how scored? →</a>`,
+    up: {
+      lbl: "How this paper uses it",
+      edges: [
+        { rel:"builds", unit:`§1 Main — the MEG/PEG framework`, sub:`The paper's whole imprinting vocabulary inherits this review's definitions` },
+        { rel:"uses", unit:`Parent-of-origin classification`, sub:`Allele-assignment rules taken directly from §3 of the review` }
+      ]
+    },
+    down: {
+      lbl: "Same reference across the graph",
+      edges: [
+        { rel:"builds", unit:`4 other preprints in your field build on it`, sub:`shared upstream node — <a class="anchor" onclick="go('discussion')">see the cluster</a>` },
+        { rel:"discussed", unit:`In 4 collections you follow`, sub:`incl. "Endosperm imprinting" · R. Narayan` }
+      ]
+    },
+    savers: [["DK","#b5121b"],["RN","#1c5fb5"],["AP","#2f7d56"]],
+    soc: `Saved by <strong>14 researchers</strong> in your field · in <strong>4 collections</strong> you follow`,
+    saved: false
+  },
+  langfelder: {
+    kicker: "📑 Reference · method",
+    title: "WGCNA: weighted correlation network analysis",
+    meta: "Langfelder &amp; Horvath · BMC Bioinformatics · 2008 · cited 18k×",
+    soundness: [95,"good"], significance: [71,"mid"],
+    scnote: `Sound &amp; ubiquitous method — but its use <em>here</em> is what's contested, not the method itself.`,
+    up: {
+      lbl: "How this paper uses it",
+      edges: [
+        { rel:"uses", unit:`§2.3 — module detection (43 modules)`, sub:`typed <em>uses-method</em> · the soft-threshold choice lives here`, mini:["mid",0.74] },
+        { rel:"supports", unit:`<span class="anchor" onclick="scrollToUnit('claim-modules')">Claim: module enrichment is biological</span>`, sub:`this method is the sole evidence for the contested claim` }
+      ]
+    },
+    down: {
+      lbl: "Contested downstream",
+      edges: [
+        { rel:"opposes", unit:`Soft-threshold → top critique`, sub:`<span class="who">Dr. Dana Køhler</span> · "artifact, not signal" · <a class="anchor" onclick="go('discussion')">thread</a>`, mini:["good",0.91] },
+        { rel:"discussed", unit:`Method commentary connected here`, sub:`"false enrichment in small modules" · added via connection` },
+        { rel:"uses", unit:`3 other papers reuse the same pipeline`, sub:`2 hit the same thresholding question` }
+      ]
+    },
+    savers: [["TS","#6b3fa0"],["DK","#b5121b"]],
+    soc: `Saved by <strong>31 researchers</strong> · flagged in <strong>1 top critique</strong> here`,
+    saved: false
+  },
+  pignatta: {
+    kicker: "📑 Reference · empirical",
+    title: "Natural epigenetic polymorphisms in Arabidopsis imprinting",
+    meta: "Pignatta et al. · eLife · 2014 · cited 210×",
+    soundness: [84,"good"], significance: [66,"mid"],
+    scnote: `Solid empirical basis; significance debated as species-specific.`,
+    up: {
+      lbl: "How this paper uses it",
+      edges: [
+        { rel:"supports", unit:`Reciprocal-cross observation (turquoise/dark)`, sub:`cited as prior evidence for the MEG/PEG module split` }
+      ]
+    },
+    down: {
+      lbl: "Where the graph disagrees",
+      edges: [
+        { rel:"opposes", unit:`<em>A. lyrata</em> study reaches opposite result`, sub:`<span class="who">R. Narayan</span> · PEG-specificity, not indiscriminate · <a class="anchor" onclick="go('discussion')">compare</a>`, mini:["good",0.84] },
+        { rel:"discussed", unit:`Cited by 2 works in your library`, sub:`both re species-specificity of the pattern` }
+      ]
+    },
+    savers: [["RN","#1c5fb5"]],
+    soc: `Saved by <strong>6 researchers</strong> in your network · <strong>2 hops</strong> away`,
+    saved: false
+  }
+};
+const figData = {
+  fig3: {
+    kicker: "🖼️ Figure 3 · from this preprint",
+    title: "Species-level imprinting affects functional modules",
+    meta: "WGCNA modules containing ≥1 imprinted gene (n of 43)",
+    preview: "Fig. 3 — module enrichment heatmap",
+    soc: `<strong>Under scrutiny</strong> — anchors the contested module-enrichment claim`,
+    up: {
+      lbl: "What this figure is evidence for",
+      edges: [
+        { rel:"supports", unit:`<span class="anchor" onclick="scrollToUnit('claim-modules')">Claim: enrichment is a biological signal</span>`, sub:`the figure <em>is</em> the evidence for this claim`, mini:["low",0.44] },
+        { rel:"uses", unit:`Built from §2.3 WGCNA modules`, sub:`inherits the soft-threshold dependency` }
+      ]
+    },
+    down: {
+      lbl: "Later work on this exact figure",
+      edges: [
+        { rel:"replicates", unit:`Pathway-restricted imprinting, Brassicaceae`, sub:`bioRxiv 2026 · reproduces the "few pathways" pattern`, mini:["good",0.88] },
+        { rel:"disputes", unit:`WGCNA soft-thresholding commentary`, sub:`<span class="who">D. Køhler</span> · "re-run with permutation null"`, mini:["good",0.91] },
+        { rel:"discussed", unit:`Tracked in 2 collections`, sub:`"Contested figures · plant epigenetics"` }
+      ]
+    },
+    savers: [["DK","#b5121b"],["TS","#6b3fa0"]]
+  },
+  tbl1: {
+    kicker: "📊 Table 1 · from this preprint",
+    title: "Imprinted gene counts per WGCNA module",
+    meta: "MEG / PEG distribution across the 43 detected modules",
+    preview: "Table 1 — per-module MEG/PEG counts",
+    soc: `Referenced in <strong>2 critique threads</strong> in the discussion`,
+    up: {
+      lbl: "What this table feeds",
+      edges: [
+        { rel:"supports", unit:`Turquoise = MEG-enriched; dark = PEG`, sub:`the raw counts behind Fig. 3's heatmap` }
+      ]
+    },
+    down: {
+      lbl: "Contested downstream",
+      edges: [
+        { rel:"disputes", unit:`Small-module counts questioned`, sub:`<span class="who">T. Świątek</span> · "n too low for enrichment call"`, mini:["mid",0.79] },
+        { rel:"discussed", unit:`Raised in 2 critique threads`, sub:`ploidy-aware recount requested` }
+      ]
+    },
+    savers: [["RN","#1c5fb5"]]
+  }
+};
+
+const pop = document.getElementById('pop');
+const popContent = document.getElementById('pop-content');
+let popHideTimer = null, popAnchor = null;
+
+function avStrip(list){ return list.map(a=>`<div class="av" style="background:${a[1]}">${a[0]}</div>`).join(""); }
+
+function edgeHTML(e){
+  const mini = e.mini ? `<span class="pg-mini ${e.mini[0]}">▲ ${e.mini[1].toFixed(2)}</span>` : "";
+  return `<div class="pg-edge">
+    <span class="pg-rel ${e.rel}">${e.rel}</span>
+    <div class="pg-edge-main">
+      <div class="pg-unit">${e.unit}${mini}</div>
+      ${e.sub ? `<div class="pg-sub">${e.sub}</div>` : ""}
+    </div>
+  </div>`;
+}
+function dirHTML(dir, cls, arrow){
+  if(!dir) return "";
+  return `<div class="pg-dir ${cls}">
+    <div class="pg-dir-lbl"><span class="arrow">${arrow}</span> ${dir.lbl}</div>
+    ${dir.edges.map(edgeHTML).join("")}
+  </div>`;
+}
+function graphHTML(d){
+  if(!d.up && !d.down) return "";
+  return `<div class="pop-graph">
+    ${dirHTML(d.up, "up", "↑")}
+    ${dirHTML(d.down, "down", "↓")}
+    <div class="pg-more" onclick="go('discussion')">Open in discourse graph →</div>
+  </div>`;
+}
+
+function refHTML(d, key){
+  return `<div class="pop-body">
+      <div class="pop-kicker">${d.kicker}</div>
+      <div class="pop-title">${d.title}</div>
+      <div class="pop-meta">${d.meta}</div>
+      <div class="pop-scores">
+        <div class="score-cell">
+          <div class="sc-lbl">Soundness</div>
+          <div class="sc-val"><span class="sc-num ${d.soundness[1]}">${(d.soundness[0]/100).toFixed(2)}</span><span class="sc-max">/ 1.0</span></div>
+          <div class="sc-bar"><i style="width:${d.soundness[0]}%;background:${d.soundness[1]==='good'?'var(--green)':'var(--amber)'}"></i></div>
+        </div>
+        <div class="score-cell">
+          <div class="sc-lbl">Significance</div>
+          <div class="sc-val"><span class="sc-num ${d.significance[1]}">${(d.significance[0]/100).toFixed(2)}</span><span class="sc-max">/ 1.0</span></div>
+          <div class="sc-bar"><i style="width:${d.significance[0]}%;background:${d.significance[1]==='good'?'var(--green)':'var(--amber)'}"></i></div>
+        </div>
+      </div>
+      <div class="pop-scnote">${d.scnote}</div>
+    </div>
+    ${graphHTML(d)}
+    <div class="pop-social">
+      <div class="savers">${avStrip(d.savers)}</div>
+      <div class="soc-txt">${d.soc}</div>
+    </div>
+    <div class="pop-actions">
+      <button class="pop-btn ${d.saved?'saved':''}" onclick="toggleSave('${key}', this)">${d.saved?'✓ Saved':'＋ Save'}</button>
+      <button class="pop-btn primary" onclick="pulsePop(this,'🔗 Connect…')">🔗 Connect</button>
+      <button class="pop-btn" onclick="go('discussion')">◎ Context</button>
+    </div>
+    <div class="pop-brand">signals via <b>Semble</b></div>`;
+}
+
+function figHTML(d){
+  return `<div class="pop-body" style="padding-bottom:0">
+      <div class="pop-kicker">${d.kicker}</div>
+      <div class="pop-title">${d.title}</div>
+      <div class="pop-meta">${d.meta}</div>
+    </div>
+    <div class="fig-preview">${d.preview}</div>
+    ${graphHTML(d)}
+    <div class="pop-social" style="margin-top:0">
+      <div class="savers">${avStrip(d.savers)}</div>
+      <div class="soc-txt">${d.soc}</div>
+    </div>
+    <div class="pop-actions">
+      <button class="pop-btn" onclick="pulsePop(this,'✓ Saved')">＋ Save figure</button>
+      <button class="pop-btn primary" onclick="pulsePop(this,'🔗 Connect…')">🔗 Connect</button>
+      <button class="pop-btn" onclick="go('discussion')">◎ Context</button>
+    </div>
+    <div class="pop-brand">signals via <b>Semble</b></div>`;
+}
+
+function toggleSave(key, btn){
+  const d = refData[key]; if(!d) return;
+  d.saved = !d.saved;
+  btn.classList.toggle('saved', d.saved);
+  btn.textContent = d.saved ? '✓ Saved' : '＋ Save';
+}
+function pulsePop(btn, label){
+  const orig = btn.textContent;
+  btn.textContent = label; btn.classList.add('saved');
+  setTimeout(()=>{ btn.textContent = orig; btn.classList.remove('saved'); }, 1100);
+}
+/* jump from a popover edge to the smaller unit it points at, in the reader body */
+function scrollToUnit(id){
+  pop.classList.remove('show');
+  if(!document.getElementById('page-reader').classList.contains('active')) go('reader');
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.scrollIntoView({behavior:'smooth', block:'center'});
+  el.style.transition='background .2s'; const prev = el.style.background;
+  el.style.background = '#e6d8f7';
+  setTimeout(()=>{ el.style.background = prev; }, 1400);
+}
+
+function showPop(anchor, html){
+  clearTimeout(popHideTimer);
+  popAnchor = anchor;
+  popContent.innerHTML = html;
+  pop.style.visibility='hidden'; pop.classList.add('show');
+  // measure then position
+  const r = anchor.getBoundingClientRect();
+  const pw = pop.offsetWidth, ph = pop.offsetHeight;
+  let left = window.scrollX + r.left - 20;
+  left = Math.min(left, window.scrollX + document.documentElement.clientWidth - pw - 12);
+  left = Math.max(left, window.scrollX + 8);
+  let top = window.scrollY + r.bottom + 10;
+  let below = false;
+  if(r.bottom + ph + 16 > window.innerHeight && r.top - ph - 10 > 0){
+    top = window.scrollY + r.top - ph - 10; below = true;
+  }
+  pop.classList.toggle('below', below);
+  pop.querySelector('.pop-arrow').style.left = Math.max(14, Math.min(window.scrollX + r.left - left + 6, pw - 26)) + 'px';
+  pop.style.left = left + 'px';
+  pop.style.top = top + 'px';
+  pop.style.visibility='visible';
+}
+function scheduleHidePop(){
+  popHideTimer = setTimeout(()=>{ pop.classList.remove('show'); popAnchor=null; }, 180);
+}
+
+document.addEventListener('mouseover', e=>{
+  const ref = e.target.closest('.ref-link');
+  const fig = e.target.closest('.fig-link');
+  if(ref){ showPop(ref, refHTML(refData[ref.dataset.ref], ref.dataset.ref)); return; }
+  if(fig){ showPop(fig, figHTML(figData[fig.dataset.fig])); return; }
+});
+document.addEventListener('mouseout', e=>{
+  const trig = e.target.closest('.ref-link, .fig-link');
+  if(trig && !e.relatedTarget?.closest?.('#pop')) scheduleHidePop();
+});
+pop.addEventListener('mouseenter', ()=> clearTimeout(popHideTimer));
+pop.addEventListener('mouseleave', scheduleHidePop);
+window.addEventListener('scroll', ()=>{ if(pop.classList.contains('show')) pop.classList.remove('show'); }, {passive:true});
+
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeAI(); closeModal('trust-modal'); closeModal('peer-modal'); pop.classList.remove('show'); }});
+</script>
 </body>
 </html>
